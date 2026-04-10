@@ -39,7 +39,7 @@
 
         /* Navigation */
         nav {
-            display: flex; justify-content: center; gap: 15px; padding: 20px;
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; padding: 20px;
             background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         nav span {
@@ -70,7 +70,8 @@
             background: rgba(255,255,255,0.1); cursor: pointer; border: 1px solid transparent;
         }
         .list-item:hover { transform: translateX(5px); border-color: var(--accent); background: rgba(255,255,255,0.2); }
-        table { width: 100%; border-collapse: collapse; }
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         tr:hover td { background: rgba(255,255,255,0.05); cursor: pointer; }
 
@@ -123,12 +124,14 @@
         #accountsToggle { display: none; padding: 8px 15px; font-size: 12px; margin-left: 10px; }
         
         @media (max-width: 768px) {
+            nav { justify-content: center; padding: 12px 10px; }
+            nav span { flex: 1 1 130px; min-width: 120px; text-align: center; }
             main { flex-direction: column; padding: 10px; gap: 10px; }
-            .view { flex: none; /* Allow view to take full height */ padding: 20px; }
+            .view { flex: none; padding: 20px; }
             .sidebar {
                 display: none; /* Hidden by default on mobile */
                 position: fixed; /* Take over screen */
-                top: 0; left: 0; width: 80%; max-width: 350px; /* Limit width */
+                top: 0; left: 0; width: 80%; max-width: 320px; /* Limit width */
                 height: 100vh; background: var(--bg-grad); z-index: 1001; /* Ensure it's above content */
                 padding: 20px; box-shadow: 20px 0 30px rgba(0,0,0,0.3);
                 transform: translateX(-100%); /* Start off-screen */
@@ -140,11 +143,15 @@
 
             #accountsToggle { display: block; } /* Show toggle button on mobile */
             .view header, .view h2 { margin-bottom: 20px; }
+            .cal-header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .cal-header button { width: 100%; }
 
-            .chart-grid { grid-template-columns: 1fr; } /* Stack charts on mobile */
-            .modal { max-width: 90%; }
-            .flex-row { justify-content: center; flex-wrap: wrap; } /* Center buttons and allow wrap */
-            .flex-row button { flex-grow: 1; } /* Buttons take up space */
+            .chart-grid { grid-template-columns: 1fr; }
+            .modal { max-width: 95%; }
+            .flex-row { justify-content: center; flex-wrap: wrap; }
+            .flex-row button { flex: 1 1 auto; }
+            .table-wrapper { overflow-x: auto; }
+            table { min-width: 520px; }
         }
         
         /* Override background for specific gradient options to be more mobile friendly if needed */
@@ -323,20 +330,22 @@
                 const sorted = state.transactions.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
                 container.innerHTML = `
                     <h2>All Transactions</h2>
-                    <table>
-                        <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
-                        <tbody>
-                            ${sorted.map(t => `
-                                <tr onclick="openTransModal(${t.id})">
-                                    <td>${t.date}</td>
-                                    <td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
-                                    <td>${state.accounts.find(a => a.id == t.accountId)?.name || 'N/A'}</td>
-                                    <td><span style="background:var(--accent); padding:3px 8px; border-radius:10px; font-size:12px; color:#fff;">${t.category}</span></td>
-                                    <td class="${t.amount < 0 ? 'negative' : 'positive'}">${state.settings.currency}${t.amount.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
+                            <tbody>
+                                ${sorted.map(t => `
+                                    <tr onclick="openTransModal(${t.id})">
+                                        <td>${t.date}</td>
+                                        <td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
+                                        <td>${state.accounts.find(a => a.id == t.accountId)?.name || 'N/A'}</td>
+                                        <td><span style="background:var(--accent); padding:3px 8px; border-radius:10px; font-size:12px; color:#fff;">${t.category}</span></td>
+                                        <td class="${t.amount < 0 ? 'negative' : 'positive'}">${state.settings.currency}${t.amount.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
             }
             else if (currentView === 'calendar') {
