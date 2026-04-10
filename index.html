@@ -37,20 +37,58 @@
         @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .animate-view { animation: slideUp 0.5s ease forwards; }
 
+        /* --- LOGIN SCREEN STYLES --- */
+        #loginScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-grad); z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .login-card {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 50px 40px; border-radius: 30px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            width: 90%; max-width: 400px;
+            animation: popIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .btn-google {
+            background: #fff; color: #333; padding: 12px 20px;
+            border-radius: 25px; font-size: 16px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            width: 100%; margin-top: 30px; cursor: pointer; border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .btn-google:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
         /* Navigation */
+        #navbar, main { display: none; /* Hidden until logged in */ }
+        
         nav {
-            display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; padding: 20px;
+            display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px 20px;
             background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap;
         }
-        nav span {
-            padding: 10px 20px; cursor: pointer; border-radius: 30px; font-weight: 600; opacity: 0.6;
+        .nav-links { display: flex; gap: 15px; justify-content: center; flex: 1; }
+        .nav-links span {
+            padding: 8px 18px; cursor: pointer; border-radius: 30px; font-weight: 600; opacity: 0.6;
         }
-        nav span:hover { background: var(--card-bg); opacity: 1; transform: translateY(-2px); }
-        nav span.active { background: var(--accent); color: white; opacity: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .nav-links span:hover { background: var(--card-bg); opacity: 1; transform: translateY(-2px); }
+        .nav-links span.active { background: var(--accent); color: white; opacity: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+        /* User Profile Bubble */
+        .user-profile {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.1); padding: 5px 15px 5px 5px; border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .user-profile img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .logout-btn { background: transparent; color: #e74c3c; box-shadow: none; padding: 5px 8px; font-size: 12px; margin: 0; }
+        .logout-btn:hover { background: rgba(231, 76, 60, 0.1); }
 
         /* Main Layout */
         main {
-            display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px;
+            flex: 1; overflow: hidden; padding: 20px; gap: 20px;
             max-width: 1400px; margin: 0 auto; width: 100%;
         }
         .view { flex: 3; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius); padding: 30px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -70,8 +108,7 @@
             background: rgba(255,255,255,0.1); cursor: pointer; border: 1px solid transparent;
         }
         .list-item:hover { transform: translateX(5px); border-color: var(--accent); background: rgba(255,255,255,0.2); }
-        .table-wrapper { width: 100%; overflow-x: auto; }
-        table { width: 100%; min-width: 600px; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         tr:hover td { background: rgba(255,255,255,0.05); cursor: pointer; }
 
@@ -90,7 +127,7 @@
             color: var(--text-main); font-size: 1rem; outline: none; backdrop-filter: blur(5px);
         }
         input:focus, select:focus { border-color: var(--accent); }
-        option { background: var(--bg-grad); color: #000; } /* Fix dropdown readability */
+        option { background: var(--bg-grad); color: #000; }
 
         /* Smart Calendar */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -124,54 +161,61 @@
         #accountsToggle { display: none; padding: 8px 15px; font-size: 12px; margin-left: 10px; }
         
         @media (max-width: 768px) {
-            nav { justify-content: center; padding: 12px 10px; }
-            nav span { flex: 1 1 130px; min-width: 120px; text-align: center; }
+            nav { flex-direction: column; }
+            .nav-links { flex-wrap: wrap; }
+            .user-profile { width: 100%; justify-content: center; margin-top: 10px; }
+            
             main { flex-direction: column; padding: 10px; gap: 10px; }
             .view { flex: none; padding: 20px; }
             .sidebar {
-                display: none; /* Hidden by default on mobile */
-                position: fixed; /* Take over screen */
-                top: 0; left: 0; width: 80%; max-width: 320px; /* Limit width */
-                height: 100vh; background: var(--bg-grad); z-index: 1001; /* Ensure it's above content */
+                display: none; position: fixed; 
+                top: 0; left: 0; width: 80%; max-width: 350px; 
+                height: 100vh; background: var(--bg-grad); z-index: 1001; 
                 padding: 20px; box-shadow: 20px 0 30px rgba(0,0,0,0.3);
-                transform: translateX(-100%); /* Start off-screen */
+                transform: translateX(-100%); 
                 transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             }
             .sidebar.visible { transform: translateX(0); }
-            .sidebar .card { margin-bottom: 15px; }
-            .sidebar .list-item { padding: 12px 15px; }
-
-            #accountsToggle { display: block; } /* Show toggle button on mobile */
-            .view header, .view h2 { margin-bottom: 20px; }
-            .cal-header { flex-direction: column; align-items: stretch; gap: 10px; }
-            .cal-header button { width: 100%; }
-
+            #accountsToggle { display: block; }
             .chart-grid { grid-template-columns: 1fr; }
-            .modal { max-width: 95%; }
             .flex-row { justify-content: center; flex-wrap: wrap; }
-            .flex-row button { flex: 1 1 auto; }
-            .table-wrapper { overflow-x: auto; }
-            table { min-width: 520px; }
+            .flex-row button { flex-grow: 1; }
         }
-        
-        /* Override background for specific gradient options to be more mobile friendly if needed */
-        /* Example: */
-        /* [data-bg-grad="blue"] { --bg-grad: linear-gradient(to bottom, #e0f7fa, #b2ebf2); } */
-        /* This is more about palette choice than structure, but can be adjusted */
-
     </style>
 </head>
 <body data-theme="dark">
 
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h1 style="font-size: 2.8em; margin-bottom: 5px;">Star<span style="color: var(--accent)">Budget</span></h1>
+            <p class="text-muted" style="letter-spacing: 2px;">SMART FINANCE</p>
+            <button class="btn-google" id="googleSignInBtn">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="24" alt="Google Logo">
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- NAVIGATION (Hidden until login) -->
     <nav id="navbar">
-        <span data-target="home" class="active">Home</span>
-        <span data-target="table">Transactions</span>
-        <span data-target="calendar">Smart Calendar</span>
-        <span data-target="overview">Overview</span>
-        <span data-target="settings">Settings</span>
+        <div class="nav-links" id="navLinks">
+            <span data-target="home" class="active">Home</span>
+            <span data-target="table">Transactions</span>
+            <span data-target="calendar">Smart Calendar</span>
+            <span data-target="overview">Overview</span>
+            <span data-target="settings">Settings</span>
+        </div>
+        
+        <div class="user-profile" id="userProfile">
+            <img id="userPic" src="https://via.placeholder.com/32" alt="Profile">
+            <span id="userName" style="font-size: 14px; font-weight: bold;">User</span>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
     </nav>
 
-    <main>
+    <!-- MAIN APP (Hidden until login) -->
+    <main id="appMain">
         <section class="view animate-view" id="view-container"></section>
 
         <aside class="sidebar" id="sidebar">
@@ -192,7 +236,7 @@
         </aside>
     </main>
 
-    <!-- Generic Modal for Forms -->
+    <!-- Modals -->
     <div class="overlay" id="formModal">
         <div class="modal">
             <h2 id="modalTitle">Edit</h2>
@@ -205,7 +249,6 @@
         </div>
     </div>
 
-    <!-- Day View Modal (Calendar) -->
     <div class="overlay" id="dayModal">
         <div class="modal" style="max-width: 500px;">
             <h2 id="dayModalTitle">Transactions</h2>
@@ -218,8 +261,8 @@
 
     <div class="signature">Created by Adit Malakar</div>
 
+    <!-- SCRIPT 1: MAIN APPLICATION LOGIC -->
     <script>
-        // --- SMART DATA STATE ---
         const DEFAULT_STATE = {
             transactions: [
                 { id: 1, accountId: 1, name: "Grocery Shopping", merchant: "Whole Foods", amount: -120.50, category: "Food", date: new Date().toISOString().split('T')[0] },
@@ -234,33 +277,27 @@
         };
 
         let state = JSON.parse(localStorage.getItem('starbudget_v2')) || DEFAULT_STATE;
-        
-        // App State
         let currentView = 'home';
         let editingId = null;
         let editingType = null;
-        let calDate = new Date(); // For Smart Calendar
-        let chartInstances = []; // To manage Chart.js lifecycles
-        let isSidebarVisible = false; // For mobile sidebar toggle
+        let calDate = new Date(); 
+        let chartInstances = []; 
+        let isSidebarVisible = false;
 
-        // --- CORE ENGINES ---
         function saveState() {
             localStorage.setItem('starbudget_v2', JSON.stringify(state));
             updateUI();
         }
 
-        // Smart computed balance: Initial Balance + Sum of transactions linked to account
         function getAccountBalance(accId) {
             const acc = state.accounts.find(a => a.id == accId);
             if (!acc) return 0;
             const txs = state.transactions.filter(t => t.accountId == accId);
-            const sum = txs.reduce((total, t) => total + t.amount, 0);
-            return acc.initialBalance + sum;
+            return acc.initialBalance + txs.reduce((total, t) => total + t.amount, 0);
         }
 
         function updateUI() {
             applySettings();
-            
             let totalNetWorth = 0;
             const accHTML = state.accounts.map(acc => {
                 const bal = getAccountBalance(acc.id);
@@ -269,20 +306,17 @@
                     <div class="list-item" onclick="openAccountModal(${acc.id})" style="padding: 10px 15px;">
                         <span>${acc.name}</span>
                         <strong style="color: ${bal < 0 ? '#e74c3c' : 'inherit'}">${state.settings.currency}${bal.toLocaleString(undefined, {minimumFractionDigits:2})}</strong>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
             
             document.getElementById('accList').innerHTML = accHTML || '<p class="text-muted">No accounts added.</p>';
             document.getElementById('netWorthDisplay').innerText = `${state.settings.currency}${totalNetWorth.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-            
             renderView();
         }
 
-        // --- ROUTING & VIEWS ---
-        document.querySelectorAll('#navbar span').forEach(btn => {
+        document.querySelectorAll('#navLinks span').forEach(btn => {
             btn.onclick = () => {
-                document.querySelectorAll('#navbar span').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('#navLinks span').forEach(s => s.classList.remove('active'));
                 btn.classList.add('active');
                 currentView = btn.dataset.target;
                 renderView();
@@ -292,13 +326,10 @@
         function renderView() {
             const container = document.getElementById('view-container');
             container.innerHTML = ""; 
-            
-            // Re-trigger animation
             container.classList.remove('animate-view');
             void container.offsetWidth; 
             container.classList.add('animate-view');
 
-            // Destroy old charts if navigating away from overview
             if(chartInstances.length) {
                 chartInstances.forEach(c => c.destroy());
                 chartInstances = [];
@@ -307,72 +338,43 @@
             if (currentView === 'home') {
                 const recent = state.transactions.slice().sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 15);
                 container.innerHTML = `
-                    <div class="cal-header">
-                        <h2>Recent Activity</h2>
-                        <button onclick="openTransModal()">+ New Transaction</button>
-                    </div>
-                    ${recent.map(t => {
-                        const accName = state.accounts.find(a => a.id == t.accountId)?.name || 'Unknown';
-                        return `
+                    <div class="cal-header"><h2>Recent Activity</h2><button onclick="openTransModal()">+ New Transaction</button></div>
+                    ${recent.map(t => `
                         <div class="list-item" onclick="openTransModal(${t.id})">
-                            <div>
-                                <div style="font-size:1.1em; font-weight:600;">${t.name}</div>
-                                <div class="text-muted">${t.category} • ${accName} • ${t.date}</div>
-                            </div>
-                            <div class="${t.amount < 0 ? 'negative' : 'positive'}">
-                                ${t.amount < 0 ? '-' : '+'}${state.settings.currency}${Math.abs(t.amount).toFixed(2)}
-                            </div>
+                            <div><div style="font-size:1.1em; font-weight:600;">${t.name}</div><div class="text-muted">${t.category} • ${state.accounts.find(a => a.id == t.accountId)?.name || 'Unknown'} • ${t.date}</div></div>
+                            <div class="${t.amount < 0 ? 'negative' : 'positive'}">${t.amount < 0 ? '-' : '+'}${state.settings.currency}${Math.abs(t.amount).toFixed(2)}</div>
                         </div>
-                    `}).join('') || '<p class="text-muted">No recent transactions.</p>'}
+                    `).join('') || '<p class="text-muted">No recent transactions.</p>'}
                 `;
-            } 
-            else if (currentView === 'table') {
+            } else if (currentView === 'table') {
                 const sorted = state.transactions.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
                 container.innerHTML = `
                     <h2>All Transactions</h2>
-                    <div class="table-wrapper">
-                        <table>
-                            <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
-                            <tbody>
-                                ${sorted.map(t => `
-                                    <tr onclick="openTransModal(${t.id})">
-                                        <td>${t.date}</td>
-                                        <td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
-                                        <td>${state.accounts.find(a => a.id == t.accountId)?.name || 'N/A'}</td>
-                                        <td><span style="background:var(--accent); padding:3px 8px; border-radius:10px; font-size:12px; color:#fff;">${t.category}</span></td>
-                                        <td class="${t.amount < 0 ? 'negative' : 'positive'}">${state.settings.currency}${t.amount.toFixed(2)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                    <table>
+                        <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
+                        <tbody>${sorted.map(t => `
+                            <tr onclick="openTransModal(${t.id})">
+                                <td>${t.date}</td><td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
+                                <td>${state.accounts.find(a => a.id == t.accountId)?.name || 'N/A'}</td>
+                                <td><span style="background:var(--accent); padding:3px 8px; border-radius:10px; font-size:12px; color:#fff;">${t.category}</span></td>
+                                <td class="${t.amount < 0 ? 'negative' : 'positive'}">${state.settings.currency}${t.amount.toFixed(2)}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
                 `;
-            }
-            else if (currentView === 'calendar') {
+            } else if (currentView === 'calendar') {
                 container.innerHTML = `
-                    <div class="cal-header">
-                        <h2>Smart Calendar</h2>
-                        <div>
-                            <button class="secondary" onclick="changeMonth(-1)" style="padding: 8px 15px;">&lt;</button>
-                            <span id="calMonthYear" style="margin: 0 15px; font-weight:bold; font-size:1.2em;"></span>
-                            <button class="secondary" onclick="changeMonth(1)" style="padding: 8px 15px;">&gt;</button>
-                        </div>
-                    </div>
-                    <div class="calendar-grid" id="calGrid"></div>
+                    <div class="cal-header"><h2>Smart Calendar</h2><div>
+                        <button class="secondary" onclick="changeMonth(-1)" style="padding: 8px 15px;">&lt;</button>
+                        <span id="calMonthYear" style="margin: 0 15px; font-weight:bold; font-size:1.2em;"></span>
+                        <button class="secondary" onclick="changeMonth(1)" style="padding: 8px 15px;">&gt;</button>
+                    </div></div><div class="calendar-grid" id="calGrid"></div>
                 `;
                 renderCalendar();
-            }
-            else if (currentView === 'overview') {
-                container.innerHTML = `
-                    <h2>Analytics Overview</h2>
-                    <div class="chart-grid">
-                        <div class="chart-box"><h3>Spending by Category</h3><canvas id="pieChart"></canvas></div>
-                        <div class="chart-box"><h3>Income vs Expenses</h3><canvas id="barChart"></canvas></div>
-                    </div>
-                `;
+            } else if (currentView === 'overview') {
+                container.innerHTML = `<h2>Analytics Overview</h2><div class="chart-grid"><div class="chart-box"><h3>Spending by Category</h3><canvas id="pieChart"></canvas></div><div class="chart-box"><h3>Income vs Expenses</h3><canvas id="barChart"></canvas></div></div>`;
                 renderCharts();
-            }
-            else if (currentView === 'settings') {
+            } else if (currentView === 'settings') {
                 const colors = ['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'];
                 container.innerHTML = `
                     <h2>App Settings</h2>
@@ -380,62 +382,37 @@
                         <div>
                             <label class="text-muted">Theme Mode</label>
                             <select onchange="updateSetting('theme', this.value)">
-                                <option value="light" ${state.settings.theme === 'light' ? 'selected' : ''}>Light Mode</option>
-                                <option value="dark" ${state.settings.theme === 'dark' ? 'selected' : ''}>Dark Mode</option>
+                                <option value="light" ${state.settings.theme === 'light' ? 'selected' : ''}>Light Mode</option><option value="dark" ${state.settings.theme === 'dark' ? 'selected' : ''}>Dark Mode</option>
                             </select>
-                            
                             <label class="text-muted">Background Style</label>
                             <select onchange="updateSetting('bgGrad', this.value)">
-                                <option value="light" ${state.settings.bgGrad === 'light' ? 'selected' : ''}>Warm Marble</option>
-                                <option value="blue" ${state.settings.bgGrad === 'blue' ? 'selected' : ''}>Ocean Blue</option>
-                                <option value="purple" ${state.settings.bgGrad === 'purple' ? 'selected' : ''}>Deep Galaxy</option>
+                                <option value="light" ${state.settings.bgGrad === 'light' ? 'selected' : ''}>Warm Marble</option><option value="blue" ${state.settings.bgGrad === 'blue' ? 'selected' : ''}>Ocean Blue</option><option value="purple" ${state.settings.bgGrad === 'purple' ? 'selected' : ''}>Deep Galaxy</option>
                             </select>
-
-                            <label class="text-muted">Currency Symbol</label>
+                            <label class="text-muted">Currency</label>
                             <select onchange="updateSetting('currency', this.value)">
-                                <option value="$" ${state.settings.currency === '$' ? 'selected' : ''}>USD ($)</option>
-                                <option value="€" ${state.settings.currency === '€' ? 'selected' : ''}>Euro (€)</option>
-                                <option value="£" ${state.settings.currency === '£' ? 'selected' : ''}>GBP (£)</option>
-                                <option value="¥" ${state.settings.currency === '¥' ? 'selected' : ''}>JPY (¥)</option>
-                                <option value="Rs. " ${state.settings.currency === 'Rs. ' ? 'selected' : ''}>NRS/INR (Rs.)</option>
+                                <option value="$" ${state.settings.currency === '$' ? 'selected' : ''}>USD ($)</option><option value="€" ${state.settings.currency === '€' ? 'selected' : ''}>Euro (€)</option><option value="£" ${state.settings.currency === '£' ? 'selected' : ''}>GBP (£)</option><option value="Rs. " ${state.settings.currency === 'Rs. ' ? 'selected' : ''}>NRS/INR (Rs.)</option>
                             </select>
                         </div>
                         <div>
                             <label class="text-muted">Accent Color</label>
-                            <div class="color-picker">
-                                ${colors.map(c => `<div class="swatch ${state.settings.accent === c ? 'active' : ''}" style="background:${c}" onclick="updateSetting('accent', '${c}')"></div>`).join('')}
-                            </div>
-
-                            <label class="text-muted">Interface Scale (${state.settings.fontSize}px)</label>
+                            <div class="color-picker">${colors.map(c => `<div class="swatch ${state.settings.accent === c ? 'active' : ''}" style="background:${c}" onclick="updateSetting('accent', '${c}')"></div>`).join('')}</div>
+                            <label class="text-muted">Interface Scale</label>
                             <input type="range" min="14" max="22" value="${state.settings.fontSize}" onchange="updateSetting('fontSize', this.value)">
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
         }
 
-        // --- SMART CALENDAR LOGIC ---
-        function changeMonth(dir) {
-            calDate.setMonth(calDate.getMonth() + dir);
-            renderCalendar();
-        }
-
+        function changeMonth(dir) { calDate.setMonth(calDate.getMonth() + dir); renderCalendar(); }
         function renderCalendar() {
-            const year = calDate.getFullYear();
-            const month = calDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
+            const year = calDate.getFullYear(), month = calDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
             document.getElementById('calMonthYear').innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
-            
             let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div style="font-weight:bold; opacity:0.7;">${d}</div>`).join('');
-            
             for(let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
-            
             for(let i=1; i<=daysInMonth; i++) {
                 const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                const txs = state.transactions.filter(t => t.date === dStr);
-                const hasData = txs.length > 0;
+                const hasData = state.transactions.some(t => t.date === dStr);
                 html += `<div class="cal-day" onclick="openDayView('${dStr}')">${i} ${hasData ? '<div class="cal-dot"></div>' : ''}</div>`;
             }
             document.getElementById('calGrid').innerHTML = html;
@@ -444,109 +421,48 @@
         function openDayView(dateStr) {
             const txs = state.transactions.filter(t => t.date === dateStr);
             document.getElementById('dayModalTitle').innerText = `Activity on ${dateStr}`;
-            
-            let content = txs.length === 0 ? '<p class="text-muted">No transactions on this date.</p>' : '';
-            txs.forEach(t => {
-                content += `
-                    <div class="list-item" onclick="closeModal('dayModal'); openTransModal(${t.id})">
-                        <div><strong>${t.name}</strong><br><small>${t.category}</small></div>
-                        <div class="${t.amount < 0 ? 'negative' : 'positive'}">${t.amount < 0 ? '-' : '+'}${state.settings.currency}${Math.abs(t.amount)}</div>
-                    </div>
-                `;
-            });
-            document.getElementById('dayModalContent').innerHTML = content;
+            document.getElementById('dayModalContent').innerHTML = txs.length === 0 ? '<p class="text-muted">No transactions.</p>' : txs.map(t => `
+                <div class="list-item" onclick="closeModal('dayModal'); openTransModal(${t.id})">
+                    <div><strong>${t.name}</strong><br><small>${t.category}</small></div>
+                    <div class="${t.amount < 0 ? 'negative' : 'positive'}">${t.amount < 0 ? '-' : '+'}${state.settings.currency}${Math.abs(t.amount)}</div>
+                </div>`).join('');
             document.getElementById('dayModal').style.display = 'flex';
         }
 
-        // --- OVERVIEW CHARTS LOGIC ---
         function renderCharts() {
-            const catTotals = {};
-            let inc = 0, exp = 0;
-
+            const catTotals = {}; let inc = 0, exp = 0;
             state.transactions.forEach(t => {
-                if(t.amount < 0) {
-                    exp += Math.abs(t.amount);
-                    catTotals[t.category] = (catTotals[t.category] || 0) + Math.abs(t.amount);
-                } else {
-                    inc += t.amount;
-                }
+                if(t.amount < 0) { exp += Math.abs(t.amount); catTotals[t.category] = (catTotals[t.category] || 0) + Math.abs(t.amount); } 
+                else inc += t.amount;
             });
-
             Chart.defaults.color = state.settings.theme === 'dark' ? '#fff' : '#000';
-
-            const ctxPie = document.getElementById('pieChart').getContext('2d');
-            chartInstances.push(new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(catTotals),
-                    datasets: [{
-                        data: Object.values(catTotals),
-                        backgroundColor: ['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, cutout: '70%', plugins: { legend: { position: 'right' } } }
-            }));
-
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            chartInstances.push(new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: ['Income', 'Expenses'],
-                    datasets: [{
-                        label: 'Amount',
-                        data: [inc, exp],
-                        backgroundColor: ['#2ecc71', '#e74c3c'],
-                        borderRadius: 10
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            }));
+            chartInstances.push(new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: Object.keys(catTotals), datasets: [{ data: Object.values(catTotals), backgroundColor: ['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'], borderWidth: 0 }] }, options: { responsive: true, cutout: '70%' } }));
+            chartInstances.push(new Chart(document.getElementById('barChart'), { type: 'bar', data: { labels: ['Income', 'Expenses'], datasets: [{ data: [inc, exp], backgroundColor: ['#2ecc71', '#e74c3c'], borderRadius: 10 }] }, options: { responsive: true, plugins: { legend: { display: false } } } }));
         }
 
-        // --- MODAL FORMS (CRUD) ---
         function handleCategorySelect(selectObj) {
             if(selectObj.value === "NEW_CAT") {
                 const newCat = prompt("Enter new category name:");
                 if(newCat && newCat.trim() !== "") {
-                    const cleanCat = newCat.trim();
-                    if(!state.categories.includes(cleanCat)) {
-                        state.categories.push(cleanCat);
-                        saveState();
-                    }
-                    // Rebuild the dropdown Options
-                    const html = state.categories.map(c => `<option value="${c}" ${c===cleanCat?'selected':''}>${c}</option>`).join('') + `<option value="NEW_CAT" style="font-weight:bold;">+ Add New Category...</option>`;
-                    selectObj.innerHTML = html;
-                    selectObj.value = cleanCat;
-                } else {
-                    selectObj.selectedIndex = 0; // fallback
-                }
+                    state.categories.push(newCat.trim()); saveState();
+                    selectObj.innerHTML = state.categories.map(c => `<option value="${c}">${c}</option>`).join('') + `<option value="NEW_CAT">+ Add New...</option>`;
+                    selectObj.value = newCat.trim();
+                } else selectObj.selectedIndex = 0;
             }
         }
 
         function openTransModal(id = null) {
             editingId = id; editingType = 'trans';
             const t = id ? state.transactions.find(x => x.id === id) : { name: '', merchant: '', amount: '', category: state.categories[0], accountId: state.accounts[0]?.id, date: new Date().toISOString().split('T')[0] };
-            
             if(state.accounts.length === 0) return alert("Please create an Account first!");
-
             document.getElementById('modalTitle').innerText = id ? "Edit Transaction" : "New Transaction";
             document.getElementById('modalDeleteBtn').style.display = id ? "block" : "none";
-            
             document.getElementById('modalContent').innerHTML = `
-                <label class="text-muted">Account</label>
                 <select id="fAcc">${state.accounts.map(a => `<option value="${a.id}" ${t.accountId==a.id?'selected':''}>${a.name}</option>`).join('')}</select>
-                
-                <input id="fName" value="${t.name}" placeholder="Title (e.g. Coffee)">
+                <input id="fName" value="${t.name}" placeholder="Title">
                 <input id="fMerch" value="${t.merchant}" placeholder="Merchant / Note">
-                
-                <label class="text-muted">Category</label>
-                <select id="fCat" onchange="handleCategorySelect(this)">
-                    ${state.categories.map(c => `<option value="${c}" ${t.category===c?'selected':''}>${c}</option>`).join('')}
-                    <option value="NEW_CAT" style="font-weight:bold; color:var(--accent);">+ Add New Category...</option>
-                </select>
-
-                <input id="fAmt" value="${t.amount}" placeholder="Amount (Math allowed: 50+20)">
+                <select id="fCat" onchange="handleCategorySelect(this)">${state.categories.map(c => `<option value="${c}" ${t.category===c?'selected':''}>${c}</option>`).join('')}<option value="NEW_CAT">+ Add New Category...</option></select>
+                <input id="fAmt" value="${t.amount}" placeholder="Amount">
                 <input type="date" id="fDate" value="${t.date}">
             `;
             document.getElementById('formModal').style.display = 'flex';
@@ -557,122 +473,120 @@
             const a = id ? state.accounts.find(x => x.id === id) : { name: '', initialBalance: 0 };
             document.getElementById('modalTitle').innerText = id ? "Edit Account" : "New Account";
             document.getElementById('modalDeleteBtn').style.display = id ? "block" : "none";
-            document.getElementById('modalContent').innerHTML = `
-                <input id="fName" value="${a.name}" placeholder="Account Name (e.g. Chase Checking)">
-                <label class="text-muted">Starting Balance</label>
-                <input id="fAmt" type="number" step="0.01" value="${a.initialBalance}" placeholder="0.00">
-                <small class="text-muted" style="display:block; margin-top:-5px;">Current balance will auto-calculate based on transactions.</small>
-            `;
+            document.getElementById('modalContent').innerHTML = `<input id="fName" value="${a.name}" placeholder="Account Name"><input id="fAmt" type="number" step="0.01" value="${a.initialBalance}" placeholder="Starting Balance">`;
             document.getElementById('formModal').style.display = 'flex';
         }
 
         document.getElementById('modalSaveBtn').onclick = () => {
             if (editingType === 'trans') {
                 const rawAmt = document.getElementById('fAmt').value.toString();
-                let amt = 0;
-                // Safe basic math evaluator
-                try { amt = new Function('return ' + rawAmt.replace(/[^-()\d/*+.]/g, ''))(); } catch(e) { amt = parseFloat(rawAmt); }
-                if (isNaN(amt)) amt = 0;
-
-                // Smart Sign Assignment
-                const isIncome = document.getElementById('fCat').value.toLowerCase().includes('income');
-                if (!rawAmt.startsWith('-') && !rawAmt.startsWith('+')) {
-                    amt = isIncome ? Math.abs(amt) : -Math.abs(amt);
-                }
-
-                const newData = {
-                    id: editingId || Date.now(),
-                    accountId: parseInt(document.getElementById('fAcc').value),
-                    name: document.getElementById('fName').value || 'Unnamed',
-                    merchant: document.getElementById('fMerch').value,
-                    amount: amt,
-                    category: document.getElementById('fCat').value,
-                    date: document.getElementById('fDate').value
-                };
-
-                if (editingId) state.transactions = state.transactions.map(t => t.id === editingId ? newData : t);
-                else state.transactions.push(newData);
-
+                let amt = parseFloat(rawAmt) || 0;
+                if (!rawAmt.startsWith('-') && !rawAmt.startsWith('+')) amt = document.getElementById('fCat').value.toLowerCase().includes('income') ? Math.abs(amt) : -Math.abs(amt);
+                const newData = { id: editingId || Date.now(), accountId: parseInt(document.getElementById('fAcc').value), name: document.getElementById('fName').value || 'Unnamed', merchant: document.getElementById('fMerch').value, amount: amt, category: document.getElementById('fCat').value, date: document.getElementById('fDate').value };
+                if (editingId) state.transactions = state.transactions.map(t => t.id === editingId ? newData : t); else state.transactions.push(newData);
             } else {
-                const newData = {
-                    id: editingId || Date.now(),
-                    name: document.getElementById('fName').value || 'New Account',
-                    initialBalance: parseFloat(document.getElementById('fAmt').value) || 0
-                };
-                if (editingId) state.accounts = state.accounts.map(a => a.id === editingId ? newData : a);
-                else state.accounts.push(newData);
+                const newData = { id: editingId || Date.now(), name: document.getElementById('fName').value || 'New Account', initialBalance: parseFloat(document.getElementById('fAmt').value) || 0 };
+                if (editingId) state.accounts = state.accounts.map(a => a.id === editingId ? newData : a); else state.accounts.push(newData);
             }
-            saveState();
-            closeModal('formModal');
+            saveState(); closeModal('formModal');
         };
 
         document.getElementById('modalDeleteBtn').onclick = () => {
-            if(confirm("Are you sure you want to delete this?")) {
+            if(confirm("Are you sure?")) {
                 if (editingType === 'trans') state.transactions = state.transactions.filter(x => x.id !== editingId);
-                else {
-                    state.accounts = state.accounts.filter(x => x.id !== editingId);
-                    state.transactions = state.transactions.filter(t => t.accountId !== editingId); // cascade delete
-                }
-                saveState();
-                closeModal('formModal');
+                else { state.accounts = state.accounts.filter(x => x.id !== editingId); state.transactions = state.transactions.filter(t => t.accountId !== editingId); }
+                saveState(); closeModal('formModal');
             }
         };
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // --- SETTINGS ENGINES ---
         function applySettings() {
             document.body.setAttribute('data-theme', state.settings.theme);
             document.documentElement.style.setProperty('--font-size', state.settings.fontSize + 'px');
             document.documentElement.style.setProperty('--accent', state.settings.accent);
-
             let bg;
             if (state.settings.bgGrad === 'blue') bg = state.settings.theme === 'dark' ? 'linear-gradient(135deg, #0f172a, #172f45, #264263)' : 'linear-gradient(135deg, #d9e8f5, #9dbce0)';
             else if (state.settings.bgGrad === 'purple') bg = state.settings.theme === 'dark' ? 'linear-gradient(135deg, #121229, #1d2b46, #2e3f5e)' : 'linear-gradient(135deg, #dde2f0, #b0bcd2)';
             else bg = state.settings.theme === 'dark' ? 'linear-gradient(135deg, #121b29, #192a3d)' : 'linear-gradient(135deg, #f4f7fb, #d7dee6)';
-            
             document.documentElement.style.setProperty('--bg-grad', bg);
         }
+        function updateSetting(key, val) { state.settings[key] = key === 'fontSize' ? Number(val) : val; saveState(); }
 
-        function updateSetting(key, val) {
-            state.settings[key] = key === 'fontSize' ? Number(val) : val;
-            saveState();
-        }
-
-        // --- MOBILE RESPONSIVE TOGGLES ---
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('accountsToggle');
+        const sidebar = document.getElementById('sidebar'), toggleBtn = document.getElementById('accountsToggle');
+        toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('visible'); isSidebarVisible = sidebar.classList.contains('visible'); });
         
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('visible');
-            isSidebarVisible = sidebar.classList.contains('visible');
-            // Optionally close other modals if sidebar opens
-            if (isSidebarVisible) {
-                closeModal('formModal');
-                closeModal('dayModal');
+        updateUI(); // Initial load for UI
+    </script>
+
+
+    <!-- SCRIPT 2: FIREBASE AUTHENTICATION LOGIC -->
+    <!-- SCRIPT 2: FIREBASE AUTHENTICATION LOGIC -->
+    <script type="module">
+        // 1. Import from Firebase CDN (Because we are using plain HTML)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js"; // <-- Added Analytics
+
+        // 2. Your NEW configuration object
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4y0KVpqNda3yBCJ4qjm5k8gw7BaThZ60",
+            authDomain: "starbudget-ed80c.firebaseapp.com",
+            projectId: "starbudget-ed80c",
+            storageBucket: "starbudget-ed80c.firebasestorage.app",
+            messagingSenderId: "36097989310",
+            appId: "1:36097989310:web:808eec8418311d08c69cef",
+            measurementId: "G-3TRKFDHY01"
+        };
+
+        // 3. Initialize Firebase, Analytics, and Auth
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // <-- Initializes Analytics
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // 4. UI Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const navbar = document.getElementById('navbar');
+        const mainApp = document.getElementById('appMain');
+        const userName = document.getElementById('userName');
+        const userPic = document.getElementById('userPic');
+
+        // 5. Google Sign-In Button Logic
+        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Login Error:", error);
+                alert("Login Failed: " + error.message);
             }
         });
 
-        // Close sidebar if clicking outside of it
-        document.addEventListener('click', (e) => {
-            if (isSidebarVisible && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                sidebar.classList.remove('visible');
-                isSidebarVisible = false;
+        // 6. Logout Button Logic
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // 7. Listen to Login/Logout changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User IS logged in
+                loginScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loginScreen.style.display = 'none';
+                    navbar.style.display = 'flex';
+                    mainApp.style.display = 'flex';
+                    
+                    userName.innerText = user.displayName.split(' ')[0];
+                    userPic.src = user.photoURL;
+                }, 400);
+            } else {
+                // User is NOT logged in
+                loginScreen.style.display = 'flex';
+                loginScreen.style.opacity = '1';
+                navbar.style.display = 'none';
+                mainApp.style.display = 'none';
             }
         });
-
-        // Close sidebar when navigating to a new view (on mobile)
-        document.querySelectorAll('#navbar span').forEach(tab => {
-            tab.addEventListener('click', () => {
-                if (isSidebarVisible && window.innerWidth <= 768) {
-                    sidebar.classList.remove('visible');
-                    isSidebarVisible = false;
-                }
-            });
-        });
-
-        // --- INIT ---
-        updateUI();
     </script>
 </body>
 </html>
