@@ -7,6 +7,7 @@
     <!-- Chart.js for Overview Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ... [All your existing CSS remains exactly the same] ... */
         :root {
             --bg-grad: linear-gradient(135deg, #f4f7fb 0%, #d7dee6 100%);
             --card-bg: rgba(255, 255, 255, 0.82);
@@ -32,12 +33,10 @@
             height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Animations */
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .animate-view { animation: slideUp 0.5s ease forwards; }
 
-        /* --- LOGIN SCREEN STYLES --- */
         #loginScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-grad); z-index: 2000;
@@ -61,8 +60,7 @@
         }
         .btn-google:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
 
-        /* Navigation */
-        #navbar, main { display: none; /* Hidden until logged in */ }
+        #navbar, main { display: none; }
         
         nav {
             display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px 20px;
@@ -70,13 +68,10 @@
             flex-wrap: wrap;
         }
         .nav-links { display: flex; gap: 15px; justify-content: center; flex: 1; }
-        .nav-links span {
-            padding: 8px 18px; cursor: pointer; border-radius: 30px; font-weight: 600; opacity: 0.6;
-        }
+        .nav-links span { padding: 8px 18px; cursor: pointer; border-radius: 30px; font-weight: 600; opacity: 0.6; }
         .nav-links span:hover { background: var(--card-bg); opacity: 1; transform: translateY(-2px); }
         .nav-links span.active { background: var(--accent); color: white; opacity: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-        /* User Profile Bubble */
         .user-profile {
             display: flex; align-items: center; gap: 10px;
             background: rgba(255,255,255,0.1); padding: 5px 15px 5px 5px; border-radius: 30px;
@@ -86,22 +81,16 @@
         .logout-btn { background: transparent; color: #e74c3c; box-shadow: none; padding: 5px 8px; font-size: 12px; margin: 0; }
         .logout-btn:hover { background: rgba(231, 76, 60, 0.1); }
 
-        /* Main Layout */
-        main {
-            flex: 1; overflow: hidden; padding: 20px; gap: 20px;
-            max-width: 1400px; margin: 0 auto; width: 100%;
-        }
+        main { flex: 1; overflow: hidden; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
         .view { flex: 3; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius); padding: 30px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .sidebar { flex: 1; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
         .card { background: var(--card-bg); border-radius: var(--border-radius); padding: 25px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 
-        /* Typography & Elements */
         h1, h2, h3 { margin-top: 0; }
         .text-muted { opacity: 0.7; font-size: 0.85em; }
         .positive { color: #2ecc71 !important; font-weight: bold; }
         .negative { font-weight: bold; }
 
-        /* Lists & Tables */
         .list-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; margin-bottom: 12px; border-radius: 15px;
@@ -112,7 +101,6 @@
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         tr:hover td { background: rgba(255,255,255,0.05); cursor: pointer; }
 
-        /* Inputs & Buttons */
         button {
             border: none; padding: 10px 20px; border-radius: 20px; background: var(--accent);
             color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -129,20 +117,18 @@
         input:focus, select:focus { border-color: var(--accent); }
         option { background: var(--bg-grad); color: #000; }
 
-        /* Smart Calendar */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
         .cal-day { padding: 15px 5px; border-radius: 12px; background: rgba(255,255,255,0.05); cursor: pointer; position: relative; min-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .cal-day:hover { background: var(--accent); color: white; transform: scale(1.05); }
+        .cal-day.today { background: var(--accent); color: white; box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.12); }
         .cal-day.empty { background: transparent; cursor: default; }
         .cal-day.empty:hover { transform: none; }
         .cal-dot { height: 6px; width: 6px; background: var(--accent); border-radius: 50%; margin-top: 5px; }
 
-        /* Overview Charts */
         .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
         .chart-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: var(--border-radius); }
 
-        /* Modals */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000;
@@ -152,19 +138,16 @@
         .flex-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
         .signature { position: fixed; bottom: 15px; right: 25px; font-size: 12px; opacity: 0.5; font-weight: bold; letter-spacing: 1px;}
         
-        /* Settings Color Picker */
         .color-picker { display: flex; gap: 10px; margin-bottom: 20px; }
         .swatch { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
         .swatch.active { border-color: var(--text-main); transform: scale(1.1); }
 
-        /* --- MOBILE RESPONSIVE --- */
         #accountsToggle { display: none; padding: 8px 15px; font-size: 12px; margin-left: 10px; }
         
         @media (max-width: 768px) {
             nav { flex-direction: column; }
             .nav-links { flex-wrap: wrap; }
             .user-profile { width: 100%; justify-content: center; margin-top: 10px; }
-            
             main { flex-direction: column; padding: 10px; gap: 10px; }
             .view { flex: none; padding: 20px; }
             .sidebar {
@@ -185,7 +168,6 @@
 </head>
 <body data-theme="dark">
 
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen">
         <div class="login-card">
             <h1 style="font-size: 2.8em; margin-bottom: 5px;">Star<span style="color: var(--accent)">Budget</span></h1>
@@ -197,7 +179,6 @@
         </div>
     </div>
 
-    <!-- NAVIGATION (Hidden until login) -->
     <nav id="navbar">
         <div class="nav-links" id="navLinks">
             <span data-target="home" class="active">Home</span>
@@ -208,13 +189,13 @@
         </div>
         
         <div class="user-profile" id="userProfile">
+            <span id="syncStatus" style="font-size: 11px; opacity: 0.7; margin-right: 5px;"></span> <!-- SYNC INDICATOR -->
             <img id="userPic" src="https://via.placeholder.com/32" alt="Profile">
             <span id="userName" style="font-size: 14px; font-weight: bold;">User</span>
             <button id="logoutBtn" class="logout-btn">Logout</button>
         </div>
     </nav>
 
-    <!-- MAIN APP (Hidden until login) -->
     <main id="appMain">
         <section class="view animate-view" id="view-container"></section>
 
@@ -276,6 +257,7 @@
             settings: { theme: 'dark', bgGrad: 'purple', accent: '#bb86fc', fontSize: 16, currency: '$' }
         };
 
+        // Initialize state locally first (Cloud sync will overwrite if it exists)
         let state = JSON.parse(localStorage.getItem('starbudget_v2')) || DEFAULT_STATE;
         let currentView = 'home';
         let editingId = null;
@@ -284,9 +266,23 @@
         let chartInstances = []; 
         let isSidebarVisible = false;
 
+        // Bridge function: Called by Firebase script when Cloud data is loaded
+        window.applyCloudState = function(cloudState) {
+            if (cloudState) {
+                state = cloudState;
+                localStorage.setItem('starbudget_v2', JSON.stringify(state));
+                updateUI();
+            }
+        };
+
+        // Modified saveState to trigger Cloud Sync
         function saveState() {
             localStorage.setItem('starbudget_v2', JSON.stringify(state));
             updateUI();
+            // Call the Firebase script function if the user is logged in
+            if (window.firebaseSyncState) {
+                window.firebaseSyncState(state);
+            }
         }
 
         function getAccountBalance(accId) {
@@ -407,13 +403,15 @@
         function renderCalendar() {
             const year = calDate.getFullYear(), month = calDate.getMonth();
             const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
+            const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('calMonthYear').innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
             let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div style="font-weight:bold; opacity:0.7;">${d}</div>`).join('');
             for(let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
             for(let i=1; i<=daysInMonth; i++) {
                 const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                 const hasData = state.transactions.some(t => t.date === dStr);
-                html += `<div class="cal-day" onclick="openDayView('${dStr}')">${i} ${hasData ? '<div class="cal-dot"></div>' : ''}</div>`;
+                const todayClass = dStr === todayStr ? ' today' : '';
+                html += `<div class="cal-day${todayClass}" onclick="openDayView('${dStr}')">${i} ${hasData ? '<div class="cal-dot"></div>' : ''}</div>`;
             }
             document.getElementById('calGrid').innerHTML = html;
         }
@@ -462,7 +460,7 @@
                 <input id="fName" value="${t.name}" placeholder="Title">
                 <input id="fMerch" value="${t.merchant}" placeholder="Merchant / Note">
                 <select id="fCat" onchange="handleCategorySelect(this)">${state.categories.map(c => `<option value="${c}" ${t.category===c?'selected':''}>${c}</option>`).join('')}<option value="NEW_CAT">+ Add New Category...</option></select>
-                <input id="fAmt" value="${t.amount}" placeholder="Amount">
+                <input id="fAmt" value="${Math.abs(t.amount) || ''}" placeholder="Amount">
                 <input type="date" id="fDate" value="${t.date}">
             `;
             document.getElementById('formModal').style.display = 'flex';
@@ -500,6 +498,7 @@
         };
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
         function applySettings() {
             document.body.setAttribute('data-theme', state.settings.theme);
             document.documentElement.style.setProperty('--font-size', state.settings.fontSize + 'px');
@@ -519,15 +518,14 @@
     </script>
 
 
-    <!-- SCRIPT 2: FIREBASE AUTHENTICATION LOGIC -->
-    <!-- SCRIPT 2: FIREBASE AUTHENTICATION LOGIC -->
+    <!-- SCRIPT 2: FIREBASE AUTH & FIRESTORE LOGIC -->
     <script type="module">
-        // 1. Import from Firebase CDN (Because we are using plain HTML)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js"; // <-- Added Analytics
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js"; 
+        // 1. IMPORT FIRESTORE
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. Your NEW configuration object
         const firebaseConfig = {
             apiKey: "AIzaSyD4y0KVpqNda3yBCJ4qjm5k8gw7BaThZ60",
             authDomain: "starbudget-ed80c.firebaseapp.com",
@@ -538,38 +536,78 @@
             measurementId: "G-3TRKFDHY01"
         };
 
-        // 3. Initialize Firebase, Analytics, and Auth
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app); // <-- Initializes Analytics
+        const analytics = getAnalytics(app); 
         const auth = getAuth(app);
+        const db = getFirestore(app); // 2. INIT FIRESTORE
         const provider = new GoogleAuthProvider();
 
-        // 4. UI Elements
         const loginScreen = document.getElementById('loginScreen');
         const navbar = document.getElementById('navbar');
         const mainApp = document.getElementById('appMain');
         const userName = document.getElementById('userName');
         const userPic = document.getElementById('userPic');
+        const syncStatus = document.getElementById('syncStatus'); // Sync indicator
 
-        // 5. Google Sign-In Button Logic
+        let currentUserUid = null;
+
+        // 3. CLOUD SYNC FUNCTIONS
+        window.firebaseSyncState = async (appState) => {
+            if (!currentUserUid) return;
+            try {
+                syncStatus.innerText = "Syncing...";
+                syncStatus.style.color = "var(--text-main)";
+                await setDoc(doc(db, "users", currentUserUid), { data: appState });
+                syncStatus.innerText = "Synced ✨";
+                syncStatus.style.color = "#2ecc71";
+            } catch (error) {
+                console.error("Cloud Sync Error:", error);
+                syncStatus.innerText = "Sync Failed ❌";
+                syncStatus.style.color = "#e74c3c";
+            }
+        };
+
+        async function loadDataFromCloud(uid) {
+            try {
+                syncStatus.innerText = "Loading data...";
+                const docSnap = await getDoc(doc(db, "users", uid));
+                if (docSnap.exists()) {
+                    // Overwrite local UI with Cloud data
+                    window.applyCloudState(docSnap.data().data);
+                    syncStatus.innerText = "Synced ✨";
+                    syncStatus.style.color = "#2ecc71";
+                } else {
+                    // First time user: Push their local setup to the cloud
+                    const initialState = JSON.parse(localStorage.getItem('starbudget_v2'));
+                    if(initialState) window.firebaseSyncState(initialState);
+                }
+            } catch (error) {
+                console.error("Error loading cloud data:", error);
+            }
+        }
+
+        // Login Logic
         document.getElementById('googleSignInBtn').addEventListener('click', async () => {
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                console.error("Login Error:", error);
                 alert("Login Failed: " + error.message);
             }
         });
 
-        // 6. Logout Button Logic
+        // Logout Logic
         document.getElementById('logoutBtn').addEventListener('click', () => {
             signOut(auth);
         });
 
-        // 7. Listen to Login/Logout changes
-        onAuthStateChanged(auth, (user) => {
+        // Listen to Auth State
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User IS logged in
+                currentUserUid = user.uid;
+                
+                // Fetch data from firestore BEFORE showing the app
+                await loadDataFromCloud(user.uid);
+
                 loginScreen.style.opacity = '0';
                 setTimeout(() => {
                     loginScreen.style.display = 'none';
@@ -580,7 +618,7 @@
                     userPic.src = user.photoURL;
                 }, 400);
             } else {
-                // User is NOT logged in
+                currentUserUid = null;
                 loginScreen.style.display = 'flex';
                 loginScreen.style.opacity = '1';
                 navbar.style.display = 'none';
