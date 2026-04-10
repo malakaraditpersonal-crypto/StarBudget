@@ -7,7 +7,6 @@
     <!-- Chart.js for Overview Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ... [All your existing CSS remains exactly the same] ... */
         :root {
             --bg-grad: linear-gradient(135deg, #f4f7fb 0%, #d7dee6 100%);
             --card-bg: rgba(255, 255, 255, 0.82);
@@ -74,8 +73,18 @@
 
         .user-profile {
             display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.1); padding: 5px 15px 5px 5px; border-radius: 30px;
+            background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 30px;
             border: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+        #syncStatus {
+            width: 90px;
+            min-width: 90px;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
         }
         .user-profile img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .logout-btn { background: transparent; color: #e74c3c; box-shadow: none; padding: 5px 8px; font-size: 12px; margin: 0; }
@@ -94,9 +103,17 @@
         .list-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; margin-bottom: 12px; border-radius: 15px;
-            background: rgba(255,255,255,0.1); cursor: pointer; border: 1px solid transparent;
+            background: rgba(255,255,255,0.1); cursor: pointer; border: 1px solid transparent; gap: 10px;
         }
+        /* Prevents text overflow breaking layouts */
+        .list-item > div:first-child { flex: 1; min-width: 0; padding-right: 15px; }
+        .list-item > div:first-child > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         .list-item:hover { transform: translateX(5px); border-color: var(--accent); background: rgba(255,255,255,0.2); }
+        
+        /* Table Responsive Base */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+        .table-responsive table { min-width: 600px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         tr:hover td { background: rgba(255,255,255,0.05); cursor: pointer; }
@@ -112,7 +129,7 @@
         input, select {
             width: 100%; padding: 12px 15px; margin: 8px 0 15px; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
-            color: var(--text-main); font-size: 1rem; outline: none; backdrop-filter: blur(5px);
+            color: var(--text-main); font-size: 1rem; outline: none; backdrop-filter: blur(5px); box-sizing: border-box;
         }
         input:focus, select:focus { border-color: var(--accent); }
         option { background: var(--bg-grad); color: #000; }
@@ -129,6 +146,8 @@
         .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
         .chart-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: var(--border-radius); }
 
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000;
@@ -136,33 +155,70 @@
         .modal { background: var(--bg-grad); padding: 35px; border-radius: var(--border-radius); width: 100%; max-width: 450px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
         
         .flex-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-        .signature { position: fixed; bottom: 15px; right: 25px; font-size: 12px; opacity: 0.5; font-weight: bold; letter-spacing: 1px;}
+        .signature { position: fixed; bottom: 15px; right: 25px; font-size: 12px; opacity: 0.5; font-weight: bold; letter-spacing: 1px; z-index: 50;}
         
-        .color-picker { display: flex; gap: 10px; margin-bottom: 20px; }
+        .color-picker { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .swatch { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
         .swatch.active { border-color: var(--text-main); transform: scale(1.1); }
 
         #accountsToggle { display: none; padding: 8px 15px; font-size: 12px; margin-left: 10px; }
         
+        /* -------------------------------------------
+           MOBILE OPTIMIZATIONS
+           ------------------------------------------- */
         @media (max-width: 768px) {
-            nav { flex-direction: column; }
-            .nav-links { flex-wrap: wrap; }
-            .user-profile { width: 100%; justify-content: center; margin-top: 10px; }
-            main { flex-direction: column; padding: 10px; gap: 10px; }
-            .view { flex: none; padding: 20px; }
+            nav { padding: 10px 0; gap: 10px; flex-direction: column; }
+            /* Make Nav Links a sleek horizontal scrollable row */
+            .nav-links { 
+                flex-wrap: nowrap; 
+                overflow-x: auto; 
+                justify-content: flex-start; 
+                width: 100%; 
+                padding: 5px 15px 10px 15px;
+                scrollbar-width: none; /* Firefox */
+                -webkit-overflow-scrolling: touch;
+            }
+            .nav-links::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+            .nav-links span { flex: 0 0 auto; text-align: center; }
+            
+            .user-profile { width: auto; margin: 0 15px 10px 15px; justify-content: center; }
+            #syncStatus { width: auto; min-width: 0; }
+            
+            main { padding: 10px; gap: 10px; }
+            .view { flex: none; padding: 20px 15px; }
             .sidebar {
                 display: none; position: fixed; 
-                top: 0; left: 0; width: 80%; max-width: 350px; 
+                top: 0; left: 0; width: 90%; max-width: 360px; 
                 height: 100vh; background: var(--bg-grad); z-index: 1001; 
-                padding: 20px; box-shadow: 20px 0 30px rgba(0,0,0,0.3);
+                padding: 18px; box-shadow: 20px 0 30px rgba(0,0,0,0.3);
                 transform: translateX(-100%); 
                 transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             }
             .sidebar.visible { transform: translateX(0); }
             #accountsToggle { display: block; }
-            .chart-grid { grid-template-columns: 1fr; }
+            
+            .chart-grid { grid-template-columns: 1fr; gap: 20px; }
+            .settings-grid { grid-template-columns: 1fr; gap: 15px; }
+            
             .flex-row { justify-content: center; flex-wrap: wrap; }
             .flex-row button { flex-grow: 1; }
+            
+            /* Responsive Modals */
+            .modal { max-width: 95%; padding: 25px 20px; max-height: 90vh; overflow-y: auto; }
+            
+            /* Calendar Resize */
+            .cal-header { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
+            .cal-header > div { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+            #calMonthYear { margin: 0; }
+            .calendar-grid { gap: 4px; }
+            .cal-day { min-height: 50px; padding: 10px 2px; font-size: 13px; }
+            
+            /* Typography Scaling */
+            h1 { font-size: 2em !important; }
+            h2 { font-size: 1.5em; }
+
+            /* Signature position reset on mobile */
+            .signature { position: relative; bottom: 0; right: 0; text-align: center; padding: 15px 0; display: block;}
         }
     </style>
 </head>
@@ -189,7 +245,7 @@
         </div>
         
         <div class="user-profile" id="userProfile">
-            <span id="syncStatus" style="font-size: 11px; opacity: 0.7; margin-right: 5px;"></span> <!-- SYNC INDICATOR -->
+            <span id="syncStatus" style="font-size: 11px; font-weight: bold; margin-right: 8px;"></span>
             <img id="userPic" src="https://via.placeholder.com/32" alt="Profile">
             <span id="userName" style="font-size: 14px; font-weight: bold;">User</span>
             <button id="logoutBtn" class="logout-btn">Logout</button>
@@ -242,7 +298,6 @@
 
     <div class="signature">Created by Adit Malakar</div>
 
-    <!-- SCRIPT 1: MAIN APPLICATION LOGIC -->
     <script>
         const DEFAULT_STATE = {
             transactions: [
@@ -257,8 +312,7 @@
             settings: { theme: 'dark', bgGrad: 'purple', accent: '#bb86fc', fontSize: 16, currency: '$' }
         };
 
-        // Initialize state locally first (Cloud sync will overwrite if it exists)
-        let state = JSON.parse(localStorage.getItem('starbudget_v2')) || DEFAULT_STATE;
+        let state = DEFAULT_STATE;
         let currentView = 'home';
         let editingId = null;
         let editingType = null;
@@ -266,25 +320,19 @@
         let chartInstances = []; 
         let isSidebarVisible = false;
 
-        // Bridge function: Called by Firebase script when Cloud data is loaded
         window.applyCloudState = function(cloudState) {
             if (cloudState) {
                 state = cloudState;
-                localStorage.setItem('starbudget_v2', JSON.stringify(state));
                 updateUI();
             }
         };
 
-        // Placeholder sync function until Firebase module finishes loading
         window.firebaseSyncState = async (appState) => {
-            console.warn('Firebase sync not ready yet. Changes are saved locally only.');
+            console.warn('Firebase sync not ready yet.');
         };
 
-        // Modified saveState to trigger Cloud Sync
         function saveState() {
-            localStorage.setItem('starbudget_v2', JSON.stringify(state));
             updateUI();
-            // Call the Firebase script function if the user is logged in
             if (window.firebaseSyncState) {
                 window.firebaseSyncState(state);
             }
@@ -351,17 +399,19 @@
                 const sorted = state.transactions.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
                 container.innerHTML = `
                     <h2>All Transactions</h2>
-                    <table>
-                        <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
-                        <tbody>${sorted.map(t => `
-                            <tr onclick="openTransModal(${t.id})">
-                                <td>${t.date}</td><td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
-                                <td>${state.accounts.find(a => a.id == t.accountId)?.name || 'N/A'}</td>
-                                <td><span style="background:var(--accent); padding:3px 8px; border-radius:10px; font-size:12px; color:#fff;">${t.category}</span></td>
-                                <td class="${t.amount < 0 ? 'negative' : 'positive'}">${state.settings.currency}${t.amount.toFixed(2)}</td>
-                            </tr>`).join('')}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
+                            <tbody>${sorted.map(t => `
+                                <tr onclick="openTransModal(${t.id})">
+                                    <td>${t.date}</td><td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
+                                    <td>${state.accounts.find(a => a.id == t.accountId)?.name || 'N/A'}</td>
+                                    <td><span style="background:var(--accent); padding:3px 8px; border-radius:10px; font-size:12px; color:#fff;">${t.category}</span></td>
+                                    <td class="${t.amount < 0 ? 'negative' : 'positive'}">${state.settings.currency}${t.amount.toFixed(2)}</td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
             } else if (currentView === 'calendar') {
                 container.innerHTML = `
@@ -379,7 +429,7 @@
                 const colors = ['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'];
                 container.innerHTML = `
                     <h2>App Settings</h2>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="settings-grid">
                         <div>
                             <label class="text-muted">Theme Mode</label>
                             <select onchange="updateSetting('theme', this.value)">
@@ -465,7 +515,7 @@
                 <input id="fName" value="${t.name}" placeholder="Title">
                 <input id="fMerch" value="${t.merchant}" placeholder="Merchant / Note">
                 <select id="fCat" onchange="handleCategorySelect(this)">${state.categories.map(c => `<option value="${c}" ${t.category===c?'selected':''}>${c}</option>`).join('')}<option value="NEW_CAT">+ Add New Category...</option></select>
-                <input id="fAmt" value="${Math.abs(t.amount) || ''}" placeholder="Amount">
+                <input id="fAmt" type="number" step="0.01" value="${Math.abs(t.amount) || ''}" placeholder="Amount">
                 <input type="date" id="fDate" value="${t.date}">
             `;
             document.getElementById('formModal').style.display = 'flex';
@@ -519,14 +569,12 @@
         const sidebar = document.getElementById('sidebar'), toggleBtn = document.getElementById('accountsToggle');
         toggleBtn.addEventListener('click', () => { sidebar.classList.toggle('visible'); isSidebarVisible = sidebar.classList.contains('visible'); });
         
-        updateUI(); // Initial load for UI
+        updateUI();
     </script>
 
-
-    <!-- SCRIPT 2: FIREBASE AUTH & FIRESTORE LOGIC -->
+    <!-- FIREBASE AUTH & FIRESTORE LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -541,10 +589,8 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        console.log('Firebase initialized');
         const auth = getAuth(app);
-        const db = getFirestore(app); // 2. INIT FIRESTORE
+        const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
         const loginScreen = document.getElementById('loginScreen');
@@ -552,23 +598,27 @@
         const mainApp = document.getElementById('appMain');
         const userName = document.getElementById('userName');
         const userPic = document.getElementById('userPic');
-        const syncStatus = document.getElementById('syncStatus'); // Sync indicator
+        const syncStatus = document.getElementById('syncStatus');
 
         let currentUserUid = null;
+        let syncTimeout = null;
 
-        // 3. CLOUD SYNC FUNCTIONS
         window.firebaseSyncState = async (appState) => {
-            if (!currentUserUid) {
-                console.warn('Firebase sync skipped because user is not signed in yet.');
-                return;
-            }
+            if (!currentUserUid) return;
+            
             try {
-                console.log('Syncing app state to Firestore for user', currentUserUid);
+                if (syncTimeout) clearTimeout(syncTimeout);
                 syncStatus.innerText = "Syncing...";
                 syncStatus.style.color = "var(--text-main)";
+                
                 await setDoc(doc(db, "users", currentUserUid), { data: appState });
-                syncStatus.innerText = "Synced ✨";
+                
+                syncStatus.innerText = "Sync Completed";
                 syncStatus.style.color = "#2ecc71";
+                
+                syncTimeout = setTimeout(() => {
+                    syncStatus.innerText = "";
+                }, 3000);
             } catch (error) {
                 console.error("Cloud Sync Error:", error);
                 syncStatus.innerText = "Sync Failed ❌";
@@ -578,25 +628,21 @@
 
         async function loadDataFromCloud(uid) {
             try {
-                syncStatus.innerText = "Loading data...";
-                console.log('Loading cloud data for user', uid);
+                syncStatus.innerText = "Fetching Cloud Data...";
                 const docSnap = await getDoc(doc(db, "users", uid));
                 if (docSnap.exists()) {
-                    console.log('Cloud data found, applying state');
                     window.applyCloudState(docSnap.data().data);
-                    syncStatus.innerText = "Synced ✨";
+                    syncStatus.innerText = "Sync Completed";
                     syncStatus.style.color = "#2ecc71";
+                    setTimeout(() => syncStatus.innerText = "", 3000);
                 } else {
-                    console.log('No cloud data found for user, pushing local state');
-                    const initialState = JSON.parse(localStorage.getItem('starbudget_v2'));
-                    if(initialState) window.firebaseSyncState(initialState);
+                    window.firebaseSyncState(state);
                 }
             } catch (error) {
                 console.error("Error loading cloud data:", error);
             }
         }
 
-        // Login Logic
         document.getElementById('googleSignInBtn').addEventListener('click', async () => {
             try {
                 await signInWithPopup(auth, provider);
@@ -605,17 +651,13 @@
             }
         });
 
-        // Logout Logic
         document.getElementById('logoutBtn').addEventListener('click', () => {
             signOut(auth);
         });
 
-        // Listen to Auth State
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
-                
-                // Fetch data from firestore BEFORE showing the app
                 await loadDataFromCloud(user.uid);
 
                 loginScreen.style.opacity = '0';
@@ -623,7 +665,6 @@
                     loginScreen.style.display = 'none';
                     navbar.style.display = 'flex';
                     mainApp.style.display = 'flex';
-                    
                     userName.innerText = user.displayName.split(' ')[0];
                     userPic.src = user.photoURL;
                 }, 400);
