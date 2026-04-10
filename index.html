@@ -275,6 +275,11 @@
             }
         };
 
+        // Placeholder sync function until Firebase module finishes loading
+        window.firebaseSyncState = async (appState) => {
+            console.warn('Firebase sync not ready yet. Changes are saved locally only.');
+        };
+
         // Modified saveState to trigger Cloud Sync
         function saveState() {
             localStorage.setItem('starbudget_v2', JSON.stringify(state));
@@ -521,9 +526,8 @@
     <!-- SCRIPT 2: FIREBASE AUTH & FIRESTORE LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js"; 
-        // 1. IMPORT FIRESTORE
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -537,7 +541,8 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app); 
+        const analytics = getAnalytics(app);
+        console.log('Firebase initialized');
         const auth = getAuth(app);
         const db = getFirestore(app); // 2. INIT FIRESTORE
         const provider = new GoogleAuthProvider();
@@ -553,8 +558,12 @@
 
         // 3. CLOUD SYNC FUNCTIONS
         window.firebaseSyncState = async (appState) => {
-            if (!currentUserUid) return;
+            if (!currentUserUid) {
+                console.warn('Firebase sync skipped because user is not signed in yet.');
+                return;
+            }
             try {
+                console.log('Syncing app state to Firestore for user', currentUserUid);
                 syncStatus.innerText = "Syncing...";
                 syncStatus.style.color = "var(--text-main)";
                 await setDoc(doc(db, "users", currentUserUid), { data: appState });
@@ -570,14 +579,15 @@
         async function loadDataFromCloud(uid) {
             try {
                 syncStatus.innerText = "Loading data...";
+                console.log('Loading cloud data for user', uid);
                 const docSnap = await getDoc(doc(db, "users", uid));
                 if (docSnap.exists()) {
-                    // Overwrite local UI with Cloud data
+                    console.log('Cloud data found, applying state');
                     window.applyCloudState(docSnap.data().data);
                     syncStatus.innerText = "Synced ✨";
                     syncStatus.style.color = "#2ecc71";
                 } else {
-                    // First time user: Push their local setup to the cloud
+                    console.log('No cloud data found for user, pushing local state');
                     const initialState = JSON.parse(localStorage.getItem('starbudget_v2'));
                     if(initialState) window.firebaseSyncState(initialState);
                 }
