@@ -29,7 +29,8 @@
         body {
             margin: 0; background: var(--bg-grad); background-attachment: fixed;
             color: var(--text-main); font-size: var(--font-size);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            min-height: 100vh; display: flex; flex-direction: column;
+            overflow-x: hidden; overflow-y: auto;
         }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -90,9 +91,9 @@
         .logout-btn { background: transparent; color: #e74c3c; box-shadow: none; padding: 5px 8px; font-size: 12px; margin: 0; }
         .logout-btn:hover { background: rgba(231, 76, 60, 0.1); }
 
-        main { flex: 1; overflow: hidden; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .view { flex: 3; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius); padding: 30px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .sidebar { flex: 1; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+        main { flex: 1; overflow: auto; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .view { flex: 3; min-width: 0; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius); padding: 30px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .sidebar { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
         .card { background: var(--card-bg); border-radius: var(--border-radius); padding: 25px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 
         h1, h2, h3 { margin-top: 0; }
@@ -167,35 +168,34 @@
            MOBILE OPTIMIZATIONS
            ------------------------------------------- */
         @media (max-width: 768px) {
+            html, body { min-height: 100%; overflow-x: hidden; }
             nav { padding: 10px 0; gap: 10px; flex-direction: column; }
-            /* Make Nav Links a sleek horizontal scrollable row */
             .nav-links { 
                 flex-wrap: nowrap; 
                 overflow-x: auto; 
                 justify-content: flex-start; 
                 width: 100%; 
                 padding: 5px 15px 10px 15px;
-                scrollbar-width: none; /* Firefox */
+                scrollbar-width: none;
                 -webkit-overflow-scrolling: touch;
             }
-            .nav-links::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+            .nav-links::-webkit-scrollbar { display: none; }
             .nav-links span { flex: 0 0 auto; text-align: center; }
             
-            .user-profile { width: auto; margin: 0 15px 10px 15px; justify-content: center; }
+            .user-profile { width: auto; margin: 0 15px 10px 15px; justify-content: center; flex-wrap: wrap; }
             #syncStatus { width: auto; min-width: 0; }
             
-            main { padding: 10px; gap: 10px; }
+            main { flex-direction: column; padding: 10px; gap: 10px; overflow: visible; }
+            .view, .sidebar { width: 100%; min-width: 0; }
             .view { flex: none; padding: 20px 15px; }
             .sidebar {
-                display: none; position: fixed; 
-                top: 0; left: 0; width: 90%; max-width: 360px; 
-                height: 100vh; background: var(--bg-grad); z-index: 1001; 
-                padding: 18px; box-shadow: 20px 0 30px rgba(0,0,0,0.3);
-                transform: translateX(-100%); 
-                transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+                display: flex; position: static; width: 100%; max-width: none;
+                height: auto; background: transparent; box-shadow: none; transform: none;
+                padding: 0; margin-top: 0;
             }
-            .sidebar.visible { transform: translateX(0); }
-            #accountsToggle { display: block; }
+            .sidebar .card { margin-bottom: 15px; }
+            #accountsToggle { display: none; }
+            .table-responsive table { min-width: 100%; }
             
             .chart-grid { grid-template-columns: 1fr; gap: 20px; }
             .settings-grid { grid-template-columns: 1fr; gap: 15px; }
@@ -203,21 +203,17 @@
             .flex-row { justify-content: center; flex-wrap: wrap; }
             .flex-row button { flex-grow: 1; }
             
-            /* Responsive Modals */
             .modal { max-width: 95%; padding: 25px 20px; max-height: 90vh; overflow-y: auto; }
             
-            /* Calendar Resize */
             .cal-header { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
-            .cal-header > div { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+            .cal-header > div { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
             #calMonthYear { margin: 0; }
             .calendar-grid { gap: 4px; }
-            .cal-day { min-height: 50px; padding: 10px 2px; font-size: 13px; }
+            .cal-day { min-height: 48px; padding: 10px 2px; font-size: 13px; }
             
-            /* Typography Scaling */
             h1 { font-size: 2em !important; }
             h2 { font-size: 1.5em; }
 
-            /* Signature position reset on mobile */
             .signature { position: relative; bottom: 0; right: 0; text-align: center; padding: 15px 0; display: block;}
         }
     </style>
