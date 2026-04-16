@@ -1401,9 +1401,9 @@ document.getElementById('googleSignInBtn').addEventListener('click', async () =>
   errEl.style.display = 'none';
 
   try {
-    // iOS Safari (especially standalone) can't do popups reliably.
-    // Use redirect always; on desktop non-standalone, prefer popup for better UX.
-    const useRedirect = isIOS() || isStandalone();
+    // Mobile browsers and standalone PWAs are more reliable with redirect-based auth.
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const useRedirect = isIOS() || isStandalone() || isMobile;
     if (useRedirect) {
       await signInWithRedirect(auth, provider);
       // Page will reload — spinner stays up until redirect
@@ -1411,8 +1411,10 @@ document.getElementById('googleSignInBtn').addEventListener('click', async () =>
       try {
         await signInWithPopup(auth, provider);
       } catch(popupErr) {
-        // Fallback to redirect if popup blocked
-        if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+        // Fallback to redirect for unsupported popup environments.
+        if (popupErr.code === 'auth/popup-blocked' ||
+            popupErr.code === 'auth/popup-closed-by-user' ||
+            popupErr.code === 'auth/operation-not-supported-in-this-environment') {
           await signInWithRedirect(auth, provider);
         } else { throw popupErr; }
       }
