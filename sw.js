@@ -3,8 +3,8 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
+  './icon-192x192.png',
+  './icon-512x512.png',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
