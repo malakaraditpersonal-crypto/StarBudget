@@ -265,10 +265,21 @@
     <div class="login-card">
         <h1 style="font-size: 2.8em; margin-bottom: 5px;">Star<span style="color: var(--accent)">Budget</span></h1>
         <p class="text-muted" style="letter-spacing: 2px;">SMART FINANCE</p>
-        <button class="btn-google" id="googleSignInBtn">
+        
+        <p style="margin: 20px 0 10px; font-size: 0.95em; color: #ff9800; line-height: 1.4;">
+            <strong>Important for iPhone users:</strong><br>
+            For Google login to work properly in the app, please sign in using normal Safari first.
+        </p>
+        
+        <button class="btn-google" id="googleSignInBtn" style="margin-top: 10px;">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="24" alt="Google Logo">
             Sign in with Google
         </button>
+
+        <p style="margin-top: 25px; font-size: 0.85em; opacity: 0.7;">
+            After successful login, you can safely "Add to Home Screen" from Safari's Share menu.<br>
+            The app will stay logged in.
+        </p>
     </div>
 </div>
 
@@ -941,14 +952,13 @@
     updateUI();
 </script>
 
-<!-- FIREBASE AUTH & FIRESTORE LOGIC - IMPROVED FOR iOS PWA -->
+<!-- FIREBASE AUTH - BETTER FOR iOS PWA -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
         getAuth,
         GoogleAuthProvider,
         signInWithRedirect,
-        signInWithPopup,
         getRedirectResult,
         onAuthStateChanged,
         signOut
@@ -978,97 +988,56 @@
     const syncStatus = document.getElementById('syncStatus');
 
     let currentUserUid = null;
-    let syncTimeout = null;
 
-    function isStandalonePWA() {
-        return window.navigator.standalone === true ||
+    function isInStandaloneMode() {
+        return ('standalone' in window.navigator && window.navigator.standalone) ||
                window.matchMedia('(display-mode: standalone)').matches;
-    }
-
-    if (isStandalonePWA()) {
-        console.log("%cTip: For smoothest login, open StarBudget in Safari first, sign in, then add to Home Screen.",
-                    "color:#4a90e2; font-weight:bold");
     }
 
     window._firebaseSyncFn = async (appState) => {
         if (!currentUserUid) return;
         try {
-            if (syncTimeout) clearTimeout(syncTimeout);
-            syncStatus.innerText = "Syncing...";
-            syncStatus.style.color = "var(--text-main)";
             await setDoc(doc(db, "users", currentUserUid), { data: appState });
             syncStatus.innerText = "✓ Synced";
             syncStatus.style.color = "#2ecc71";
-            syncTimeout = setTimeout(() => { syncStatus.innerText = ""; }, 2000);
-        } catch (error) {
-            console.error("Cloud Sync Error:", error);
-            syncStatus.innerText = "Sync Failed";
+            setTimeout(() => syncStatus.innerText = "", 2000);
+        } catch (e) {
+            console.error(e);
+            syncStatus.innerText = "Sync failed";
             syncStatus.style.color = "#e74c3c";
         }
     };
 
-    async function loadDataFromCloud(uid) {
+    async function loadCloudData(uid) {
         try {
-            syncStatus.innerText = "Loading from cloud...";
-            const docSnap = await getDoc(doc(db, "users", uid));
-            if (docSnap.exists()) {
-                window.applyCloudState(docSnap.data().data);
-                syncStatus.innerText = "✓ Cloud loaded";
-                syncStatus.style.color = "#2ecc71";
-                setTimeout(() => syncStatus.innerText = "", 2500);
+            const snap = await getDoc(doc(db, "users", uid));
+            if (snap.exists()) {
+                window.applyCloudState(snap.data().data);
             } else {
                 window._firebaseSyncFn(state);
             }
-        } catch (error) {
-            console.error("Cloud load error:", error);
-            syncStatus.innerText = "Using local data";
-            syncStatus.style.color = "#f39c12";
+        } catch (e) {
+            console.error("Cloud load failed", e);
         }
     }
 
     async function handleGoogleSignIn() {
         try {
-            const isStandalone = isStandalonePWA();
-
-            if (isStandalone) {
-                await signInWithRedirect(auth, provider);
-            } else {
-                await signInWithPopup(auth, provider);
-            }
+            await signInWithRedirect(auth, provider);
         } catch (error) {
-            console.error("Login error:", error.code, error.message);
-
-            if (error.code === "auth/popup-blocked" ||
-                error.code === "auth/operation-not-supported-in-this-environment") {
-                await signInWithRedirect(auth, provider);
-            } else {
-                alert("Login failed: " + error.message + "\n\nTry opening in normal Safari first, then add to home screen.");
-            }
-        }
-    }
-
-    async function handleRedirectResult() {
-        try {
-            const result = await getRedirectResult(auth);
-            if (result && result.user) {
-                console.log("Redirect login successful");
-            }
-        } catch (error) {
-            console.error("Redirect result error:", error);
+            console.error(error);
+            alert("Login error: " + error.message + "\n\nTry signing in from normal Safari browser.");
         }
     }
 
     document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
-
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await signOut(auth);
-    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUserUid = user.uid;
-            await handleRedirectResult();
-            await loadDataFromCloud(user.uid);
+            try { await getRedirectResult(auth); } catch (e) {}
+            await loadCloudData(user.uid);
 
             loginScreen.style.opacity = '0';
             setTimeout(() => {
@@ -1076,8 +1045,8 @@
                 navbar.style.display = 'flex';
                 mainApp.style.display = 'flex';
                 userName.innerText = user.displayName ? user.displayName.split(' ')[0] : 'User';
-                userPic.src = user.photoURL || 'https://via.placeholder.com/32';
-            }, 400);
+                if (user.photoURL) userPic.src = user.photoURL;
+            }, 300);
         } else {
             currentUserUid = null;
             loginScreen.style.display = 'flex';
@@ -1085,6 +1054,10 @@
             navbar.style.display = 'none';
             mainApp.style.display = 'none';
         }
+    });
+
+    window.addEventListener('load', () => {
+        getRedirectResult(auth).catch(() => {});
     });
 </script>
     <script>
