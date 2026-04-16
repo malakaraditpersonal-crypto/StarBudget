@@ -1,22 +1,44 @@
 {
-  "short_name": "StarBudget",
   "name": "StarBudget | Smart Finance",
+  "short_name": "StarBudget",
+  "description": "Smart personal finance tracker with cloud sync.",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0f1a",
+  "theme_color": "#0f172a",
+  "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "icon-192x192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512x512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html",
-  "background_color": "#121b29",
-  "display": "standalone",
-  "scope": "./",
-  "theme_color": "#4a90e2",
-  "description": "Smart personal finance tracker with cloud sync."
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "short_name": "Add",
+      "description": "Quickly add a new transaction",
+      "url": "./index.html?action=add_transaction",
+      "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your financial dashboard",
+      "url": "./index.html?view=home",
+      "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }
