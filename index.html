@@ -1005,8 +1005,12 @@
     }
 
     document.getElementById('googleSignInBtn').addEventListener('click', async () => {
-        try { await signInWithPopup(auth, provider); }
-        catch (error) { alert("Login Failed: " + error.message); }
+        try { 
+            await signInWithPopup(auth, provider); 
+        } catch (error) { 
+            // Silently logs to console instead of throwing an annoying alert window to the user
+            console.error("User sign in cancelled or failed:", error.message); 
+        }
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => { signOut(auth); });
