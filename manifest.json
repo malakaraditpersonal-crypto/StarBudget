@@ -1,7 +1,7 @@
 {
     "name": "StarBudget",
     "short_name": "StarBudget",
-    "description": "Smart Personal Finance Tracker",
+    "description": "Smart Personal Finance App",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#121b29",
