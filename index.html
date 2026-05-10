@@ -8,6 +8,8 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4a90e2">
     <link rel="apple-touch-icon" href="./icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -60,6 +62,15 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .btn-google:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
+        .btn-guest {
+            background: rgba(255, 255, 255, 0.05); color: var(--text-main); padding: 12px 20px;
+            border-radius: 25px; font-size: 16px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            width: 100%; margin-top: 15px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .btn-guest:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.1); }
 
         /* Top Header Structure */
         #topbar {
@@ -162,7 +173,6 @@
         button.danger { background: #e74c3c; }
         button.secondary { background: transparent; border: 2px solid var(--text-main); color: var(--text-main); box-shadow: none; }
 
-        /* Icon-only button variants */
         .icon-btn { padding: 8px 12px; }
         
         input, select {
@@ -272,6 +282,10 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Sign in with Google
         </button>
+        <button class="btn-guest" id="guestSignInBtn">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Continue as Guest
+        </button>
     </div>
 </div>
 
@@ -347,6 +361,7 @@
     </aside>
 </main>
 
+<!-- Forms -->
 <div class="overlay" id="formModal">
     <div class="modal">
         <h2 id="modalTitle">Edit</h2>
@@ -365,6 +380,7 @@
     </div>
 </div>
 
+<!-- Date View -->
 <div class="overlay" id="dayModal">
     <div class="modal" style="max-width: 500px;">
         <h2 id="dayModalTitle">Transactions</h2>
@@ -373,6 +389,19 @@
             <button onclick="closeModal('dayModal')" class="secondary">
                 <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Close
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- First Time Tutorial UI -->
+<div class="overlay" id="tutorialModal" style="z-index: 3000;">
+    <div class="modal" style="text-align: center; max-width: 450px;">
+        <div id="tutorialIcon" style="margin-bottom: 20px; color: var(--accent); display:flex; justify-content:center;"></div>
+        <div id="tutorialContent"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+            <button id="tutPrev" class="secondary icon-btn" style="padding: 8px 16px;">Back</button>
+            <div id="tutDots" style="display:flex; gap:6px;"></div>
+            <button id="tutNext" style="padding: 8px 24px;">Next</button>
         </div>
     </div>
 </div>
@@ -386,12 +415,11 @@
         if (!Array.isArray(raw.categories)) raw.categories =["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"];
         if (!raw.settings || typeof raw.settings !== 'object') raw.settings = {};
 
-        const settingDefaults = { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {} };
+        const settingDefaults = { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {}, tutorialCompleted: false, hideBalances: false };
         for (const [k, v] of Object.entries(settingDefaults)) {
             if (raw.settings[k] === undefined) raw.settings[k] = v;
         }
         if (typeof raw.settings.budgets !== 'object' || Array.isArray(raw.settings.budgets)) raw.settings.budgets = {};
-        if (typeof raw.settings.hideBalances !== 'boolean') raw.settings.hideBalances = false;
 
         raw.transactions = raw.transactions.map(t => ({
             id: t.id ?? Date.now(),
@@ -412,10 +440,10 @@
     }
 
     const DEFAULT_STATE = {
-        transactions: [],
+        transactions:[],
         accounts:[ { id: 1, name: "Main Checking", initialBalance: 0 } ],
         categories:["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"],
-        settings: { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {}, hideBalances: false }
+        settings: { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {}, tutorialCompleted: false, hideBalances: false }
     };
 
     let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -427,6 +455,72 @@
     let isOnline = navigator.onLine;
     let totalNetWorthGlobal = 0;
 
+    // --- First-Time Tutorial Sequence ---
+    const tutorialSteps =[
+        { 
+            icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
+            title: "Welcome to StarBudget!", 
+            desc: "Your smart, beautiful, and private personal finance manager. Let's take a quick tour of what you can do." 
+        },
+        { 
+            icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+            title: "Accounts & Balances", 
+            desc: "Start by adding your bank accounts or cash wallets in the sidebar. Your total net worth will calculate automatically across all accounts." 
+        },
+        { 
+            icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+            title: "Adding Transactions", 
+            desc: "Click the <strong>+ Add</strong> button or simply press the <strong>'N'</strong> key anywhere on your keyboard to quickly record an income or expense." 
+        },
+        { 
+            icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+            title: "Budgets & Calendar", 
+            desc: "Set monthly spending limits in Settings. Use the Smart Calendar and Overview tabs to visualize your daily spending habits at a glance." 
+        },
+        { 
+            icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+            title: "Make it Yours", 
+            desc: "Head over to the Settings tab to change your theme, accent color, and currency. You're all set to master your finances!" 
+        }
+    ];
+    let currentTutStep = 0;
+
+    window.checkTutorial = function() {
+        if (!state.settings.tutorialCompleted) {
+            currentTutStep = 0;
+            renderTutorialStep();
+            document.getElementById('tutorialModal').style.display = 'flex';
+        }
+    };
+
+    function renderTutorialStep() {
+        const step = tutorialSteps[currentTutStep];
+        document.getElementById('tutorialIcon').innerHTML = step.icon;
+        document.getElementById('tutorialContent').innerHTML = `
+            <h2 style="margin-bottom: 10px;">${step.title}</h2>
+            <p style="opacity: 0.8; line-height: 1.6; padding: 0 10px;">${step.desc}</p>
+        `;
+        document.getElementById('tutPrev').style.visibility = currentTutStep === 0 ? 'hidden' : 'visible';
+        document.getElementById('tutNext').innerText = currentTutStep === tutorialSteps.length - 1 ? 'Get Started' : 'Next';
+        
+        document.getElementById('tutDots').innerHTML = tutorialSteps.map((_, i) => 
+            `<div style="width:8px; height:8px; border-radius:50%; background: ${i === currentTutStep ? 'var(--accent)' : 'rgba(128,128,128,0.3)'}; transition: background 0.3s ease;"></div>`
+        ).join('');
+    }
+
+    document.getElementById('tutPrev').onclick = () => { if(currentTutStep > 0) { currentTutStep--; renderTutorialStep(); } };
+    document.getElementById('tutNext').onclick = () => {
+        if(currentTutStep < tutorialSteps.length - 1) {
+            currentTutStep++;
+            renderTutorialStep();
+        } else {
+            document.getElementById('tutorialModal').style.display = 'none';
+            state.settings.tutorialCompleted = true;
+            saveState();
+        }
+    };
+
+
     // --- Sync State Machine Architecture ---
     const SYNC_STATES = { IDLE: 'idle', SYNCING: 'syncing', COMPLETED: 'completed', ERROR: 'error' };
     let currentSyncState = SYNC_STATES.IDLE;
@@ -437,7 +531,6 @@
         const badge = document.getElementById('syncStatus');
         if (!badge) return;
 
-        // Clear any existing timeouts to prevent memory leaks/overlapping state hides
         if (syncTimeoutTimer) {
             clearTimeout(syncTimeoutTimer);
             syncTimeoutTimer = null;
@@ -445,13 +538,12 @@
 
         if (newState === SYNC_STATES.IDLE) {
             badge.classList.remove('visible');
-            // Allow CSS opacity fade to complete before hiding fully
             syncTimeoutTimer = setTimeout(() => {
                 if (currentSyncState === SYNC_STATES.IDLE) badge.style.display = 'none';
             }, 400); 
         } else {
             badge.style.display = 'inline-flex';
-            void badge.offsetWidth; // Force browser reflow to guarantee CSS transition plays
+            void badge.offsetWidth; 
             badge.classList.add('visible');
 
             if (newState === SYNC_STATES.SYNCING) {
@@ -460,18 +552,25 @@
             } else if (newState === SYNC_STATES.COMPLETED) {
                 badge.className = 'sync-status-badge completed visible';
                 badge.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Synced</span>`;
-                // Auto-hide logic for successful sync
                 syncTimeoutTimer = setTimeout(() => { setSyncState(SYNC_STATES.IDLE); }, 3000);
             } else if (newState === SYNC_STATES.ERROR) {
                 badge.className = 'sync-status-badge error visible';
                 badge.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Failed</span>`;
-                // Auto-hide logic for failed sync
                 syncTimeoutTimer = setTimeout(() => { setSyncState(SYNC_STATES.IDLE); }, 4000);
             }
         }
     }
 
     const LS_KEY = 'starbudget_local_state';
+    let isGuestSession = false;
+    function createGuestState() {
+        return {
+            transactions: [],
+            accounts: [],
+            categories: ["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"],
+            settings: { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', hideBalances: false }
+        };
+    }
     function saveToLocalStorage() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {} }
     function loadFromLocalStorage() { try { const raw = localStorage.getItem(LS_KEY); return raw ? migrateState(JSON.parse(raw)) : null; } catch(e) { return null; } }
 
@@ -487,7 +586,12 @@
     function trySyncPending() { if (pendingSync && isOnline && window._firebaseSyncFn) { pendingSync = false; window._firebaseSyncFn(state); } }
 
     window.applyCloudState = function(cloudState) { const migrated = migrateState(cloudState); if (migrated) { state = migrated; saveToLocalStorage(); updateUI(); } };
-    window.firebaseSyncState = async (appState) => { saveToLocalStorage(); if (!isOnline) { pendingSync = true; return; } if (window._firebaseSyncFn) window._firebaseSyncFn(appState); };
+    window.firebaseSyncState = async (appState) => {
+        if (!isGuestSession) saveToLocalStorage();
+        if (isGuestSession) return;
+        if (!isOnline) { pendingSync = true; return; }
+        if (window._firebaseSyncFn) window._firebaseSyncFn(appState);
+    };
     function saveState() { updateUI(); window.firebaseSyncState(state); }
 
     let searchTimeout;
@@ -641,7 +745,7 @@
             weekAgo.setDate(weekAgo.getDate() - 7);
             const weekAgoStr = weekAgo.toISOString().split('T')[0];
 
-            let txsToday = [], txsWeek =[], txsMonth =[];
+            let txsToday =[], txsWeek =[], txsMonth =[];
             const monthSpend = {};
             const txs = state.transactions;
             
@@ -1030,7 +1134,6 @@
 
     function closeModal(id) { document.getElementById(id).style.display='none'; }
 
-    // Replaced Gradients with clean, solid background colors per request
     function applySettings() {
         document.body.setAttribute('data-theme', state.settings.theme);
         document.documentElement.style.setProperty('--font-size', state.settings.fontSize+'px');
@@ -1121,13 +1224,47 @@
         catch (error) { alert("Login Failed: " + error.message); }
     });
 
+    // Guest Mode Handler
+    document.getElementById('guestSignInBtn').addEventListener('click', () => {
+        currentUserUid = null;
+        isGuestSession = true;
+        state = createGuestState();
+        updateUI();
+        loginScreen.style.opacity = '0';
+        setTimeout(() => {
+            loginScreen.style.display = 'none';
+            topbar.style.display = 'flex';
+            navbar.style.display = 'flex';
+            mainApp.style.display = 'flex';
+            userName.innerText = 'Guest User';
+            
+            // Using a simple embedded SVG data URI as the guest avatar
+            userPic.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23a0aec0"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+            
+            document.getElementById('syncStatus').style.display = 'none'; // No cloud sync for guests
+            if (window.checkTutorial) window.checkTutorial();
+        }, 400);
+    });
+
     document.getElementById('logoutBtn').addEventListener('click', () => { 
         if(syncTimeoutTimer) clearTimeout(syncTimeoutTimer);
-        signOut(auth); 
+        
+        if (currentUserUid) {
+            signOut(auth); 
+        } else {
+            // Guest logout reset
+            isGuestSession = false;
+            loginScreen.style.display = 'flex';
+            loginScreen.style.opacity = '1';
+            topbar.style.display = 'none';
+            navbar.style.display = 'none';
+            mainApp.style.display = 'none';
+        }
     });
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            isGuestSession = false;
             currentUserUid = user.uid;
             await loadDataFromCloud(user.uid);
             loginScreen.style.opacity = '0';
@@ -1138,6 +1275,7 @@
                 mainApp.style.display = 'flex';
                 userName.innerText = user.displayName.split(' ')[0];
                 userPic.src = user.photoURL;
+                if (window.checkTutorial) window.checkTutorial();
             }, 400);
         } else {
             currentUserUid = null;
