@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarBudget | Smart Finance</title>
     
-    <!-- ADD THESE 3 LINES FOR PWA -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4a90e2">
     <link rel="apple-touch-icon" href="./icon-192.png">
@@ -13,91 +12,119 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-grad: linear-gradient(135deg, #f4f7fb 0%, #d7dee6 100%);
-            --card-bg: rgba(255, 255, 255, 0.82);
-            --text-main: #24324a;
+            --bg-grad: #f4f7fb;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #000000;
             --accent: #4a90e2;
             --border-radius: 20px;
             --font-size: 16px;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         [data-theme="dark"] {
-            --bg-grad: linear-gradient(135deg, #121b29 0%, #192a3d 100%);
+            --bg-grad: #121b29;
             --card-bg: rgba(11, 18, 30, 0.75);
-            --text-main: #e9eef5;
+            --text-main: #ffffff;
             --accent: #4a90e2;
         }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: var(--transition); }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body {
             margin: 0; background: var(--bg-grad); background-attachment: fixed;
             color: var(--text-main); font-size: var(--font-size);
             min-height: 100vh; display: flex; flex-direction: column;
-            overflow-x: hidden; overflow-y: auto;
+            overflow-x: hidden; overflow-y: auto; padding-bottom: 90px;
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .animate-view { animation: slideUp 0.5s ease forwards; }
+        .animate-view { animation: slideUp 0.4s ease forwards; }
 
         #loginScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-grad); z-index: 2000;
             display: flex; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.4s ease;
         }
         .login-card {
             background: var(--card-bg); backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.2);
             padding: 50px 40px; border-radius: 30px; text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: popIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 90%; max-width: 400px;
-            animation: popIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         .btn-google {
             background: #fff; color: #333; padding: 12px 20px;
             border-radius: 25px; font-size: 16px; font-weight: bold;
             display: flex; align-items: center; justify-content: center; gap: 12px;
             width: 100%; margin-top: 30px; cursor: pointer; border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .btn-google:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
 
-        #navbar, main { display: none; }
-        nav {
-            display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px 20px;
-            background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
-            flex-wrap: wrap;
+        /* Top Header Structure */
+        #topbar {
+            display: none; justify-content: space-between; align-items: center;
+            padding: 15px 25px; background: rgba(0,0,0,0.05); backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100;
         }
-        .nav-links { display: flex; gap: 15px; justify-content: center; flex: 1; }
-        .nav-links span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 18px;
-            cursor: pointer;
-            border-radius: 30px;
-            font-weight: 600;
-            opacity: 0.6;
-            transition: background 0.3s ease, opacity 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-            transform: none;
+        .logo { font-size: 1.5em; font-weight: 800; letter-spacing: -0.5px; }
+        
+        /* Flex & Gap constraints for Avatar & Settings */
+        .user-profile-container { display: flex; align-items: center; gap: 15px; }
+        
+        .profile-card {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.08); padding: 6px 16px 6px 6px; 
+            border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .nav-links span:hover { background: var(--card-bg); opacity: 1; }
-        .nav-links span:active { transform: none; }
-        .nav-links span.active { background: var(--accent); color: white; opacity: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-
-        .user-profile {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+        .profile-card img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .profile-info { display: flex; flex-direction: column; justify-content: center; }
+        
+        /* Edit Group Isolated Inline Flex Items */
+        .edit-group {
+            display: inline-flex; align-items: center; gap: 6px; 
+            cursor: pointer; opacity: 0.7; transition: opacity 0.2s, color 0.2s;
+            margin-top: 2px;
         }
-        #syncStatus {
-            width: 90px; min-width: 90px; text-align: right; white-space: nowrap;
-            overflow: hidden; text-overflow: ellipsis; display: inline-block;
-        }
-        .user-profile img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .logout-btn { background: transparent; color: #e74c3c; box-shadow: none; padding: 5px 8px; font-size: 12px; margin: 0; }
+        .edit-group:hover { opacity: 1; color: var(--accent); }
+        .edit-group span { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .edit-group svg { display: block; }
+        
+        .logout-btn { background: transparent; color: #e74c3c; padding: 8px; border-radius: 50%; box-shadow: none; margin: 0; }
         .logout-btn:hover { background: rgba(231, 76, 60, 0.1); }
 
-        main { flex: 1; overflow: auto; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        /* Sync Badge State Machine Classes */
+        .sync-status-badge {
+            display: none; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 5px 12px; border-radius: 20px; background: rgba(0,0,0,0.1);
+            opacity: 0; transform: scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .sync-status-badge.visible { opacity: 1; transform: scale(1); display: inline-flex; }
+        .sync-status-badge.syncing { color: var(--text-main); }
+        .sync-status-badge.completed { color: #2ecc71; background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.3); }
+        .sync-status-badge.error { color: #e74c3c; background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Bottom Nav */
+        nav {
+            position: fixed; left: 0; right: 0; bottom: 0; display: none;
+            justify-content: center; align-items: center; gap: 10px;
+            padding: 10px 18px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: rgba(18, 27, 41, 0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.12); z-index: 100;
+        }
+        .nav-links span {
+            width: 50px; height: 50px; display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; border-radius: 50%; color: #fff; opacity: 0.5;
+            transition: background 0.2s ease, opacity 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .nav-links span:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+        .nav-links span.active { background: var(--accent); color: white; opacity: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+        main { flex: 1; overflow: auto; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; display: none; }
         .view { flex: 3; min-width: 0; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius); padding: 30px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .sidebar { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
         .card { background: var(--card-bg); border-radius: var(--border-radius); padding: 25px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -111,81 +138,70 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; margin-bottom: 12px; border-radius: 15px;
             background: rgba(255,255,255,0.1); cursor: pointer; border: 1px solid transparent; gap: 10px;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
         .list-item > div:first-child { flex: 1; min-width: 0; padding-right: 15px; }
         .list-item > div:first-child > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .list-item:hover { transform: translateX(5px); border-color: var(--accent); background: rgba(255,255,255,0.2); }
-        .toggle-visibility-btn {
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.08);
-            color: inherit;
-            padding: 6px 12px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-size: 0.95em;
-            min-width: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .toggle-visibility-btn:hover { background: rgba(255,255,255,0.15); }
-        .toggle-visibility-btn:active { transform: scale(0.98); }
-
+        
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
         .table-responsive table { min-width: 600px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        tr { transition: background 0.2s ease; }
         tr:hover td { background: rgba(255,255,255,0.05); cursor: pointer; }
 
         button {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             border: none; padding: 10px 20px; border-radius: 20px; background: var(--accent);
             color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, filter 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
+        button svg { width: 16px; height: 16px; flex-shrink: 0; }
         button:hover { transform: translateY(-2px); filter: brightness(1.1); }
         button.danger { background: #e74c3c; }
         button.secondary { background: transparent; border: 2px solid var(--text-main); color: var(--text-main); box-shadow: none; }
 
+        /* Icon-only button variants */
+        .icon-btn { padding: 8px 12px; }
+        
         input, select {
             width: 100%; padding: 12px 15px; margin: 8px 0 15px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.2);
             color: var(--text-main); font-size: 1rem; outline: none; backdrop-filter: blur(5px); box-sizing: border-box;
+            transition: border-color 0.2s ease, background 0.2s ease;
         }
-        input:focus, select:focus { border-color: var(--accent); }
+        input::placeholder, select::placeholder { color: rgba(255,255,255,0.5); }
+        input:focus, select:focus { border-color: var(--accent); background: rgba(255,255,255,0.3); }
         option { background: var(--bg-grad); color: #000; }
+        [data-theme="dark"] option { color: #ffffff; background: #121b29; }
+        [data-theme="light"] option { color: #000000; background: #f4f7fb; }
 
-        /* Search & filter bar */
         .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
         .filter-bar input, .filter-bar select { margin: 0; flex: 1; min-width: 120px; padding: 10px 14px; }
         .filter-bar .filter-count { font-size: 0.8em; opacity: 0.6; white-space: nowrap; padding: 0 5px; }
 
-        /* Budget bar */
         .budget-bar-wrap { margin-top: 6px; }
         .budget-bar-track { background: rgba(255,255,255,0.1); border-radius: 10px; height: 7px; overflow: hidden; }
-        .budget-bar-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+        .budget-bar-fill { height: 100%; border-radius: 10px; transition: width 0.4s ease; }
         .budget-label { display: flex; justify-content: space-between; font-size: 0.75em; opacity: 0.7; margin-top: 3px; }
 
-        /* Dashboard Additions */
         .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 15px; }
         .dash-layout-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px; }
         .dash-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .dash-card h3 { margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9; display: flex; justify-content: space-between; align-items: center; }
         .stat-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px; }
         .stat-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .stat-label { font-size: 0.9em; opacity: 0.8; }
-        .stat-value { font-weight: bold; font-size: 1.1em; }
+
         .dash-alert { padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; font-size: 0.95em; font-weight: bold; display: flex; align-items: center; gap: 10px; animation: popIn 0.3s ease; }
         .dash-alert.danger { background: rgba(231, 76, 60, 0.15); color: #ff6b6b; border: 1px solid rgba(231, 76, 60, 0.4); }
         .dash-alert.warning { background: rgba(243, 156, 18, 0.15); color: #f39c12; border: 1px solid rgba(243, 156, 18, 0.4); }
-        .insight-list { padding-left: 20px; margin: 0; font-size: 0.9em; line-height: 1.6; opacity: 0.8; }
-        .insight-list li { margin-bottom: 8px; }
-
-        /* Offline banner */
+        
         #offlineBanner { display: none; background: #f39c12; color: #fff; text-align: center; padding: 6px 15px; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-        .cal-day { padding: 15px 5px; border-radius: 12px; background: rgba(255,255,255,0.05); cursor: pointer; position: relative; min-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .cal-day { padding: 15px 5px; border-radius: 12px; background: rgba(255,255,255,0.05); cursor: pointer; position: relative; min-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; }
         .cal-day:hover { background: var(--accent); color: white; transform: scale(1.05); }
         .cal-day.today { background: var(--accent); color: white; box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.12); }
         .cal-day.empty { background: transparent; cursor: default; }
@@ -196,8 +212,6 @@
         .chart-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: var(--border-radius); }
 
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-        /* Budget settings table */
         .budget-setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .budget-setting-row label { flex: 1; font-size: 0.9em; }
         .budget-setting-row input { flex: 1; margin: 0; padding: 8px 12px; }
@@ -207,51 +221,40 @@
             backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
         .modal { background: var(--bg-grad); padding: 35px; border-radius: var(--border-radius); width: 100%; max-width: 450px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
-
         .flex-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-        .signature { position: fixed; bottom: 15px; right: 25px; font-size: 12px; opacity: 0.5; font-weight: bold; letter-spacing: 1px; z-index: 50; }
 
         .color-picker { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .swatch { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+        .swatch { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s ease, border-color 0.2s ease; }
         .swatch.active { border-color: var(--text-main); transform: scale(1.1); }
 
-        #accountsToggle { display: none; padding: 8px 15px; font-size: 12px; margin-left: 10px; }
+        #accountsToggle { display: none; margin-left: 10px; }
 
-        @media (max-width: 900px) {
-            .dash-layout-main { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 900px) { .dash-layout-main { grid-template-columns: 1fr; } }
 
         @media (max-width: 768px) {
-            html, body { min-height: 100%; overflow-x: hidden; }
-            nav { padding: 10px 0; gap: 10px; flex-direction: column; }
-            .nav-links {
-                flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
-                width: 100%; padding: 5px 15px 10px 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-            }
-            .nav-links::-webkit-scrollbar { display: none; }
-            .nav-links span { flex: 0 0 auto; text-align: center; }
-            .user-profile { width: auto; margin: 0 15px 10px 15px; justify-content: center; flex-wrap: wrap; }
-            #syncStatus { width: auto; min-width: 0; }
-            main { flex-direction: column; padding: 10px; gap: 10px; overflow: visible; }
+            main { flex-direction: column; padding: 10px; gap: 10px; overflow: visible; padding-bottom: 100px; }
+            #topbar { padding: 15px; flex-direction: column; gap: 15px; }
+            .user-profile-container { width: 100%; justify-content: space-between; }
+            
+            nav { justify-content: space-around; padding: 8px; }
+            .nav-links { width: 100%; display: flex; justify-content: space-around; }
+            .nav-links span { width: 44px; height: 44px; }
+            .nav-links span svg { width: 22px; height: 22px; }
+
             .view, .sidebar { width: 100%; min-width: 0; }
             .view { flex: none; padding: 20px 15px; }
-            .sidebar { display: flex; position: static; width: 100%; max-width: none; height: auto; background: transparent; box-shadow: none; transform: none; padding: 0; margin-top: 0; }
+            .sidebar { display: flex; position: static; width: 100%; max-width: none; height: auto; background: transparent; box-shadow: none; padding: 0; }
             .sidebar .card { margin-bottom: 15px; }
             #accountsToggle { display: none; }
             .table-responsive table { min-width: 100%; }
             .chart-grid { grid-template-columns: 1fr; gap: 20px; }
             .settings-grid { grid-template-columns: 1fr; gap: 15px; }
             .flex-row { justify-content: center; flex-wrap: wrap; }
-            .flex-row button { flex-grow: 1; }
+            .flex-row button { flex-grow: 1; justify-content: center; }
             .modal { max-width: 95%; padding: 25px 20px; max-height: 90vh; overflow-y: auto; }
             .cal-header { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
             .cal-header > div { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
-            #calMonthYear { margin: 0; }
-            .calendar-grid { gap: 4px; }
             .cal-day { min-height: 48px; padding: 10px 2px; font-size: 13px; }
-            h1 { font-size: 2em !important; }
-            h2 { font-size: 1.5em; }
-            .signature { position: relative; bottom: 0; right: 0; text-align: center; padding: 15px 0; display: block; }
             .filter-bar { flex-direction: column; }
             .filter-bar input, .filter-bar select { width: 100%; }
         }
@@ -266,25 +269,52 @@
         <h1 style="font-size: 2.8em; margin-bottom: 5px;">Star<span style="color: var(--accent)">Budget</span></h1>
         <p class="text-muted" style="letter-spacing: 2px;">SMART FINANCE</p>
         <button class="btn-google" id="googleSignInBtn">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="24" alt="Google Logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Sign in with Google
         </button>
     </div>
 </div>
 
+<header id="topbar">
+    <div class="logo">Star<span style="color: var(--accent)">Budget</span></div>
+    
+    <div class="user-profile-container">
+        <span id="syncStatus" class="sync-status-badge"></span>
+        
+        <div class="profile-card">
+            <img id="userPic" src="https://via.placeholder.com/32" alt="Profile">
+            <div class="profile-info">
+                <span id="userName" style="font-size: 13px; font-weight: bold;">User</span>
+                <div class="edit-group" onclick="document.querySelector('[data-target=settings]').click()">
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Edit</span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="logoutBtn" class="logout-btn icon-btn" title="Logout">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+    </div>
+</header>
+
 <nav id="navbar">
     <div class="nav-links" id="navLinks">
-        <span data-target="home" class="active">Dashboard</span>
-        <span data-target="table">Transactions</span>
-        <span data-target="calendar">Smart Calendar</span>
-        <span data-target="overview">Overview</span>
-        <span data-target="settings">Settings</span>
-    </div>
-    <div class="user-profile" id="userProfile">
-        <span id="syncStatus" style="font-size: 11px; font-weight: bold; margin-right: 8px;"></span>
-        <img id="userPic" src="https://via.placeholder.com/32" alt="Profile">
-        <span id="userName" style="font-size: 14px; font-weight: bold;">User</span>
-        <button id="logoutBtn" class="logout-btn">Logout</button>
+        <span data-target="home" class="active" title="Dashboard">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </span>
+        <span data-target="table" title="Transactions">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="17" y1="15" x2="17" y2="15"/></svg>
+        </span>
+        <span data-target="calendar" title="Smart Calendar">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+        <span data-target="overview" title="Overview">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-7"/></svg>
+        </span>
+        <span data-target="settings" title="Settings">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </span>
     </div>
 </nav>
 
@@ -294,16 +324,22 @@
         <div class="card">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <div class="text-muted" style="letter-spacing:1px;">TOTAL NET WORTH</div>
-                <button id="toggleNetWorthVisibility" class="toggle-visibility-btn" type="button" aria-label="Toggle net worth visibility">👁️</button>
+                <button id="toggleNetWorthVisibility" class="secondary icon-btn" type="button" aria-label="Toggle visibility">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
             </div>
             <h1 id="netWorthDisplay" style="font-size: 2.5em; margin: 10px 0;">$0.00</h1>
         </div>
         <div class="card">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:15px;">
                 <strong style="letter-spacing:1px;">ACCOUNTS</strong>
-                <div style="display:flex; align-items: center;">
-                    <button onclick="openAccountModal()" style="padding: 5px 12px; font-size:12px; margin-right:5px;">Add +</button>
-                    <button id="accountsToggle" style="padding: 5px 12px; font-size:12px;">&times;</button>
+                <div style="display:flex; align-items: center; gap: 8px;">
+                    <button onclick="openAccountModal()" class="icon-btn" style="padding: 6px 12px; font-size:12px;">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add
+                    </button>
+                    <button id="accountsToggle" class="secondary icon-btn">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
             </div>
             <div id="accList"></div>
@@ -311,15 +347,20 @@
     </aside>
 </main>
 
-<!-- Modals -->
 <div class="overlay" id="formModal">
     <div class="modal">
         <h2 id="modalTitle">Edit</h2>
         <div id="modalContent"></div>
         <div class="flex-row">
-            <button class="secondary" onclick="closeModal('formModal')">Cancel</button>
-            <button class="danger" id="modalDeleteBtn">Delete</button>
-            <button id="modalSaveBtn">Save</button>
+            <button class="secondary" onclick="closeModal('formModal')">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Cancel
+            </button>
+            <button class="danger" id="modalDeleteBtn">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete
+            </button>
+            <button id="modalSaveBtn">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save
+            </button>
         </div>
     </div>
 </div>
@@ -328,22 +369,24 @@
     <div class="modal" style="max-width: 500px;">
         <h2 id="dayModalTitle">Transactions</h2>
         <div id="dayModalContent" style="max-height: 300px; overflow-y: auto; margin: 15px 0;"></div>
-        <div class="flex-row"><button onclick="closeModal('dayModal')">Close</button></div>
+        <div class="flex-row">
+            <button onclick="closeModal('dayModal')" class="secondary">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Close
+            </button>
+        </div>
     </div>
 </div>
 
-<div class="signature">Created by Adit Malakar</div>
-
 <script>
-    // ─── MIGRATION / SAFE DEFAULTS ─────────────────────────────────────────────
+    // --- Data Management & Safe Defaults ---
     function migrateState(raw) {
         if (!raw || typeof raw !== 'object') return null;
-        if (!Array.isArray(raw.transactions)) raw.transactions = [];
-        if (!Array.isArray(raw.accounts)) raw.accounts = [];
-        if (!Array.isArray(raw.categories)) raw.categories = ["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"];
+        if (!Array.isArray(raw.transactions)) raw.transactions =[];
+        if (!Array.isArray(raw.accounts)) raw.accounts =[];
+        if (!Array.isArray(raw.categories)) raw.categories =["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"];
         if (!raw.settings || typeof raw.settings !== 'object') raw.settings = {};
 
-        const settingDefaults = { theme: 'dark', bgGrad: 'purple', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {} };
+        const settingDefaults = { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {} };
         for (const [k, v] of Object.entries(settingDefaults)) {
             if (raw.settings[k] === undefined) raw.settings[k] = v;
         }
@@ -365,22 +408,14 @@
             name: a.name ?? 'Account',
             initialBalance: typeof a.initialBalance === 'number' ? a.initialBalance : 0
         }));
-
         return raw;
     }
 
-    // ─── DEFAULT STATE ─────────────────────────────────────────────────────────
     const DEFAULT_STATE = {
-        transactions: [
-            { id: 1, accountId: 1, name: "Grocery Shopping", merchant: "Whole Foods", amount: -120.50, category: "Food", date: new Date().toISOString().split('T')[0] },
-            { id: 2, accountId: 1, name: "Monthly Salary", merchant: "Tech Corp", amount: 4500.00, category: "Income", date: new Date().toISOString().split('T')[0] }
-        ],
-        accounts: [
-            { id: 1, name: "Main Checking", initialBalance: 5000 },
-            { id: 2, name: "High Yield Savings", initialBalance: 20000 }
-        ],
-        categories: ["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"],
-        settings: { theme: 'dark', bgGrad: 'purple', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {}, hideBalances: false }
+        transactions: [],
+        accounts:[ { id: 1, name: "Main Checking", initialBalance: 0 } ],
+        categories:["Food", "Shopping", "Income", "Bills", "Entertainment", "Housing"],
+        settings: { theme: 'dark', bgGrad: 'deepBlue', accent: '#bb86fc', fontSize: 16, currency: '$', budgets: {}, hideBalances: false }
     };
 
     let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -388,17 +423,58 @@
     let editingId = null;
     let editingType = null;
     let calDate = new Date();
-    let chartInstances = [];
-    let isSidebarVisible = false;
+    let chartInstances =[];
     let isOnline = navigator.onLine;
     let totalNetWorthGlobal = 0;
 
-    // ─── LOCALSTORAGE ──────────────────────────────────────────────────────────
+    // --- Sync State Machine Architecture ---
+    const SYNC_STATES = { IDLE: 'idle', SYNCING: 'syncing', COMPLETED: 'completed', ERROR: 'error' };
+    let currentSyncState = SYNC_STATES.IDLE;
+    let syncTimeoutTimer = null;
+
+    function setSyncState(newState) {
+        currentSyncState = newState;
+        const badge = document.getElementById('syncStatus');
+        if (!badge) return;
+
+        // Clear any existing timeouts to prevent memory leaks/overlapping state hides
+        if (syncTimeoutTimer) {
+            clearTimeout(syncTimeoutTimer);
+            syncTimeoutTimer = null;
+        }
+
+        if (newState === SYNC_STATES.IDLE) {
+            badge.classList.remove('visible');
+            // Allow CSS opacity fade to complete before hiding fully
+            syncTimeoutTimer = setTimeout(() => {
+                if (currentSyncState === SYNC_STATES.IDLE) badge.style.display = 'none';
+            }, 400); 
+        } else {
+            badge.style.display = 'inline-flex';
+            void badge.offsetWidth; // Force browser reflow to guarantee CSS transition plays
+            badge.classList.add('visible');
+
+            if (newState === SYNC_STATES.SYNCING) {
+                badge.className = 'sync-status-badge syncing visible';
+                badge.innerHTML = `<svg class="spin" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="16"></circle></svg> <span>Syncing</span>`;
+            } else if (newState === SYNC_STATES.COMPLETED) {
+                badge.className = 'sync-status-badge completed visible';
+                badge.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Synced</span>`;
+                // Auto-hide logic for successful sync
+                syncTimeoutTimer = setTimeout(() => { setSyncState(SYNC_STATES.IDLE); }, 3000);
+            } else if (newState === SYNC_STATES.ERROR) {
+                badge.className = 'sync-status-badge error visible';
+                badge.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Failed</span>`;
+                // Auto-hide logic for failed sync
+                syncTimeoutTimer = setTimeout(() => { setSyncState(SYNC_STATES.IDLE); }, 4000);
+            }
+        }
+    }
+
     const LS_KEY = 'starbudget_local_state';
     function saveToLocalStorage() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {} }
     function loadFromLocalStorage() { try { const raw = localStorage.getItem(LS_KEY); return raw ? migrateState(JSON.parse(raw)) : null; } catch(e) { return null; } }
 
-    // ─── ONLINE/OFFLINE DETECTION ──────────────────────────────────────────────
     function updateOnlineStatus() {
         isOnline = navigator.onLine;
         document.getElementById('offlineBanner').style.display = isOnline ? 'none' : 'block';
@@ -410,46 +486,64 @@
     let pendingSync = false;
     function trySyncPending() { if (pendingSync && isOnline && window._firebaseSyncFn) { pendingSync = false; window._firebaseSyncFn(state); } }
 
-    // ─── FIREBASE BRIDGE ──────────────────────────────────────────────────────
     window.applyCloudState = function(cloudState) { const migrated = migrateState(cloudState); if (migrated) { state = migrated; saveToLocalStorage(); updateUI(); } };
     window.firebaseSyncState = async (appState) => { saveToLocalStorage(); if (!isOnline) { pendingSync = true; return; } if (window._firebaseSyncFn) window._firebaseSyncFn(appState); };
     function saveState() { updateUI(); window.firebaseSyncState(state); }
 
-    // ─── ACCOUNT/FINANCE HELPERS ───────────────────────────────────────────────
-    function getAccountBalance(accId) {
-        const acc = state.accounts.find(a => a.id == accId);
-        if (!acc) return 0;
-        return acc.initialBalance + state.transactions.filter(t => t.accountId == accId).reduce((s, t) => s + t.amount, 0);
+    let searchTimeout;
+    window.handleSearch = function(val) {
+        filterQuery = val;
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(renderView, 250); 
+    };
+
+    function getAccountBalances() {
+        const balances = {};
+        for(let i=0; i<state.accounts.length; i++) balances[state.accounts[i].id] = state.accounts[i].initialBalance;
+        for(let i=0; i<state.transactions.length; i++) {
+            const t = state.transactions[i];
+            if (balances[t.accountId] !== undefined) balances[t.accountId] += t.amount;
+        }
+        return balances;
     }
 
     function getTxSummary(txs) {
-        return txs.reduce((acc, t) => {
-            if(t.amount > 0) acc.inc += t.amount;
-            else acc.exp += Math.abs(t.amount);
-            acc.net = acc.inc - acc.exp;
-            return acc;
-        }, {inc: 0, exp: 0, net: 0});
+        let inc = 0, exp = 0;
+        for(let i=0; i<txs.length; i++) {
+            if(txs[i].amount > 0) inc += txs[i].amount;
+            else exp += Math.abs(txs[i].amount);
+        }
+        return {inc, exp, net: inc - exp};
     }
 
-    // ─── SEARCH/FILTER STATE ──────────────────────────────────────────────────
+    function getCurrentMonthSpendByCategory() {
+        const now = new Date();
+        const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const totals = {};
+        for(let i=0; i<state.transactions.length; i++) {
+            const t = state.transactions[i];
+            if (t.amount < 0 && t.date && t.date.startsWith(ym)) totals[t.category] = (totals[t.category] || 0) + Math.abs(t.amount);
+        }
+        return totals;
+    }
+
     let filterQuery = ''; let filterCategory = ''; let filterAccount = '';
     function getFilteredTransactions() {
+        const q = filterQuery.toLowerCase();
         return state.transactions.filter(t => {
-            const q = filterQuery.toLowerCase();
-            const matchText = !q || t.name.toLowerCase().includes(q) || t.merchant.toLowerCase().includes(q) || t.category.toLowerCase().includes(q);
-            const matchCat = !filterCategory || t.category === filterCategory;
-            const matchAcc = !filterAccount || String(t.accountId) === String(filterAccount);
-            return matchText && matchCat && matchAcc;
+            if (q && !(t.name.toLowerCase().includes(q) || t.merchant.toLowerCase().includes(q) || t.category.toLowerCase().includes(q))) return false;
+            if (filterCategory && t.category !== filterCategory) return false;
+            if (filterAccount && String(t.accountId) !== String(filterAccount)) return false;
+            return true;
         });
     }
 
-    function buildFilterBar(showCounts) {
+    function buildFilterBar(filteredCount) {
         const total = state.transactions.length;
-        const filtered = getFilteredTransactions().length;
-        const countLabel = (filterQuery || filterCategory || filterAccount) ? `${filtered} of ${total}` : `${total} total`;
+        const countLabel = (filterQuery || filterCategory || filterAccount) ? `${filteredCount} of ${total}` : `${total} total`;
         return `
             <div class="filter-bar">
-                <input type="text" placeholder="Search name, merchant, category…" value="${filterQuery.replace(/"/g,'&quot;')}" oninput="filterQuery=this.value; renderView()" style="margin:0;">
+                <input type="text" placeholder="Search name, merchant, category…" value="${filterQuery.replace(/"/g,'&quot;')}" oninput="handleSearch(this.value)" style="margin:0;">
                 <select onchange="filterCategory=this.value; renderView()" style="margin:0; flex:0.6;">
                     <option value="">All Categories</option>
                     ${state.categories.map(c => `<option value="${c}" ${filterCategory===c?'selected':''}>${c}</option>`).join('')}
@@ -459,27 +553,13 @@
                     ${state.accounts.map(a => `<option value="${a.id}" ${filterAccount==a.id?'selected':''}>${a.name}</option>`).join('')}
                 </select>
                 <span class="filter-count">${countLabel}</span>
-                ${(filterQuery||filterCategory||filterAccount) ? `<button class="secondary" onclick="filterQuery='';filterCategory='';filterAccount='';renderView()" style="padding:6px 14px;font-size:12px;">Clear</button>` : ''}
+                ${(filterQuery||filterCategory||filterAccount) ? `<button class="secondary icon-btn" onclick="filterQuery='';filterCategory='';filterAccount='';renderView()" style="padding:6px 14px;font-size:12px;">Clear</button>` : ''}
             </div>`;
-    }
-
-    // ─── BUDGET HELPERS ────────────────────────────────────────────────────────
-    function getCurrentMonthSpendByCategory() {
-        const now = new Date();
-        const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-        const totals = {};
-        state.transactions.forEach(t => {
-            if (t.amount < 0 && t.date && t.date.startsWith(ym)) {
-                totals[t.category] = (totals[t.category] || 0) + Math.abs(t.amount);
-            }
-        });
-        return totals;
     }
 
     function buildBudgetBar(category, spent, limit) {
         if (!limit || limit <= 0) return '';
         const pct = Math.min(100, (spent / limit) * 100);
-        const over = spent > limit;
         const barColor = pct >= 100 ? '#e74c3c' : pct >= 80 ? '#f39c12' : '#2ecc71';
         return `
             <div class="budget-bar-wrap" style="margin-bottom:12px;">
@@ -493,7 +573,6 @@
             </div>`;
     }
 
-    // ─── UI ────────────────────────────────────────────────────────────────────
     function formatBalanceAmount(amount) {
         if (state.settings.hideBalances) return '••••••';
         return `${state.settings.currency}${amount.toLocaleString(undefined,{minimumFractionDigits:2})}`;
@@ -502,20 +581,27 @@
     function updateUI() {
         applySettings();
         totalNetWorthGlobal = 0;
-        const accHTML = state.accounts.map(acc => {
-            const bal = getAccountBalance(acc.id);
+        const balances = getAccountBalances();
+        let accHTML = '';
+        
+        for(let i=0; i<state.accounts.length; i++) {
+            const acc = state.accounts[i];
+            const bal = balances[acc.id] || 0;
             totalNetWorthGlobal += bal;
-            return `<div class="list-item" onclick="openAccountModal(${acc.id})" style="padding: 10px 15px;">
+            accHTML += `<div class="list-item" onclick="openAccountModal(${acc.id})" style="padding: 10px 15px;">
                 <span>${acc.name}</span>
                 <strong style="color:${bal<0?'#e74c3c':'inherit'}">${formatBalanceAmount(bal)}</strong>
             </div>`;
-        }).join('');
+        }
+        
         document.getElementById('accList').innerHTML = accHTML || '<p class="text-muted">No accounts added.</p>';
         document.getElementById('netWorthDisplay').innerText = formatBalanceAmount(totalNetWorthGlobal);
+        
         const toggleBtn = document.getElementById('toggleNetWorthVisibility');
         if (toggleBtn) {
-            toggleBtn.textContent = state.settings.hideBalances ? '🙈' : '👁️';
-            toggleBtn.title = state.settings.hideBalances ? 'Show balances' : 'Hide balances';
+            toggleBtn.innerHTML = state.settings.hideBalances 
+                ? '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>' 
+                : '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         }
         renderView();
     }
@@ -543,12 +629,11 @@
         void container.offsetWidth;
         container.classList.add('animate-view');
 
-        if (chartInstances.length) { chartInstances.forEach(c => c.destroy()); chartInstances = []; }
+        if (chartInstances.length) { chartInstances.forEach(c => c.destroy()); chartInstances =[]; }
 
         const cur = state.settings.currency;
 
         if (currentView === 'home') {
-            // Dashboard calculations
             const today = new Date();
             const todayStr = today.toISOString().split('T')[0];
             const monthStr = todayStr.slice(0, 7);
@@ -556,68 +641,59 @@
             weekAgo.setDate(weekAgo.getDate() - 7);
             const weekAgoStr = weekAgo.toISOString().split('T')[0];
 
-            const txsToday = state.transactions.filter(t => t.date === todayStr);
-            const txsWeek = state.transactions.filter(t => t.date >= weekAgoStr && t.date <= todayStr);
-            const txsMonth = state.transactions.filter(t => t.date.startsWith(monthStr));
+            let txsToday = [], txsWeek =[], txsMonth =[];
+            const monthSpend = {};
+            const txs = state.transactions;
+            
+            for(let i=0; i<txs.length; i++) {
+                const t = txs[i];
+                if (t.date === todayStr) txsToday.push(t);
+                if (t.date >= weekAgoStr && t.date <= todayStr) txsWeek.push(t);
+                if (t.date.startsWith(monthStr)) {
+                    txsMonth.push(t);
+                    if (t.amount < 0) monthSpend[t.category] = (monthSpend[t.category] || 0) + Math.abs(t.amount);
+                }
+            }
 
             const sumToday = getTxSummary(txsToday);
             const sumWeek = getTxSummary(txsWeek);
             const sumMonth = getTxSummary(txsMonth);
 
-            // Budget Alerts & Previews
-            const monthSpend = getCurrentMonthSpendByCategory();
-            const budgets = state.settings.budgets || {};
-            let alertsHTML = '';
-            let budgetPreviews = [];
-            let totalBudgetLimit = 0;
-            let totalBudgetSpend = 0;
-
-            Object.keys(budgets).forEach(cat => {
-                const limit = budgets[cat];
-                if(limit > 0) {
-                    const spent = monthSpend[cat] || 0;
-                    const pct = (spent / limit) * 100;
-                    totalBudgetLimit += limit;
-                    totalBudgetSpend += spent;
-
-                    if(pct >= 100) alertsHTML += `<div class="dash-alert danger">⚠️ You have exceeded your budget for ${cat}!</div>`;
-                    else if(pct >= 85) alertsHTML += `<div class="dash-alert warning">⚠️ You are nearing your budget limit for ${cat}.</div>`;
-
-                    budgetPreviews.push({ cat, limit, spent, pct });
-                }
-            });
-            budgetPreviews.sort((a,b) => b.pct - a.pct); // Highest % first
-
-            // Insights
-            const insights = [];
+            const insights =[];
             if(sumMonth.net > 0) insights.push(`You have a surplus of <strong>${cur}${sumMonth.net.toFixed(2)}</strong> this month!`);
             else if(sumMonth.net < 0) insights.push(`You are running a deficit of <strong>${cur}${Math.abs(sumMonth.net).toFixed(2)}</strong> this month.`);
             
             const expWeekList = txsWeek.filter(t => t.amount < 0).sort((a,b) => a.amount - b.amount);
             if(expWeekList.length > 0) insights.push(`Largest expense this week: <strong>${expWeekList[0].name}</strong> (${cur}${Math.abs(expWeekList[0].amount).toFixed(2)})`);
 
-            // Chart Data Prep
-            const last7DaysLabels = [];
-            const last7DaysData = [];
+            const last7DaysLabels =[];
+            const last7DaysData = new Array(7).fill(0);
+            const dayMap = {};
             for(let i=6; i>=0; i--) {
                 const d = new Date(today);
                 d.setDate(today.getDate() - i);
                 last7DaysLabels.push(d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }));
-                const dStr = d.toISOString().split('T')[0];
-                const dayExp = state.transactions.filter(t => t.date === dStr && t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-                last7DaysData.push(dayExp);
+                dayMap[d.toISOString().split('T')[0]] = 6 - i;
             }
 
-            const recent5 = state.transactions.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+            for(let i=0; i<txsWeek.length; i++) {
+                const t = txsWeek[i];
+                if(t.amount < 0 && dayMap[t.date] !== undefined) last7DaysData[dayMap[t.date]] += Math.abs(t.amount);
+            }
+
+            const recent5 = txs.slice().sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
+            const accMap = {};
+            for(let i=0; i<state.accounts.length; i++) accMap[state.accounts[i].id] = state.accounts[i].name;
 
             container.innerHTML = `
                 <div class="cal-header" style="margin-bottom:10px;">
                     <h2 style="margin:0;">Dashboard Overview</h2>
-                    <button onclick="openTransModal()">+ Add Transaction</button>
+                    <button onclick="openTransModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Transaction
+                    </button>
                 </div>
                 <p class="text-muted" style="font-size:0.8em; margin-bottom:20px;">Press <kbd style="background:rgba(255,255,255,0.15);padding:2px 6px;border-radius:5px;">N</kbd> to quickly add an item.</p>
-                
-                <div id="dash-alerts">${alertsHTML}</div>
                 
                 <div class="dash-grid">
                     <div class="dash-card">
@@ -630,12 +706,6 @@
                         <div class="stat-row"><span class="stat-label">Income</span><span class="stat-value positive">+${cur}${sumToday.inc.toFixed(2)}</span></div>
                         <div class="stat-row"><span class="stat-label">Expenses</span><span class="stat-value negative">-${cur}${sumToday.exp.toFixed(2)}</span></div>
                         <div class="stat-row"><span class="stat-label">Net</span><span class="stat-value ${sumToday.net<0?'negative':'positive'}">${cur}${Math.abs(sumToday.net).toFixed(2)}</span></div>
-                    </div>
-                    <div class="dash-card">
-                        <h3>This Week</h3>
-                        <div class="stat-row"><span class="stat-label">Income</span><span class="stat-value positive">+${cur}${sumWeek.inc.toFixed(2)}</span></div>
-                        <div class="stat-row"><span class="stat-label">Expenses</span><span class="stat-value negative">-${cur}${sumWeek.exp.toFixed(2)}</span></div>
-                        <div class="stat-row"><span class="stat-label">Net</span><span class="stat-value ${sumWeek.net<0?'negative':'positive'}">${cur}${Math.abs(sumWeek.net).toFixed(2)}</span></div>
                     </div>
                     <div class="dash-card">
                         <h3>This Month</h3>
@@ -655,30 +725,25 @@
                         <ul class="insight-list">
                             ${insights.map(i => `<li>${i}</li>`).join('') || '<li>Not enough data for insights yet.</li>'}
                         </ul>
-                        
-                        <h3 style="margin-top:20px;">Budget Status</h3>
-                        ${totalBudgetLimit > 0 ? buildBudgetBar('Overall Total', totalBudgetSpend, totalBudgetLimit) : ''}
-                        <div style="margin-top:10px;">
-                            ${budgetPreviews.slice(0,3).map(b => buildBudgetBar(b.cat, b.spent, b.limit)).join('') || '<p class="text-muted" style="font-size:0.85em;">No active budgets limits to display.</p>'}
-                        </div>
                     </div>
                 </div>
 
                 <div class="dash-card" style="margin-top:20px;">
                     <div class="cal-header" style="margin-bottom:0;">
                         <h3 style="margin:0;">Recent Transactions</h3>
-                        <button class="secondary" style="padding:6px 14px; font-size:0.85em;" onclick="document.querySelector('[data-target=table]').click()">View All</button>
+                        <button class="secondary icon-btn" style="padding:6px 14px; font-size:0.85em;" onclick="document.querySelector('[data-target=table]').click()">
+                            View All <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
                     </div>
                     <div style="margin-top:15px;">
                         ${recent5.map(t => `
                             <div class="list-item" onclick="openTransModal(${t.id})">
-                                <div><div style="font-weight:600;">${t.name}</div><div class="text-muted" style="font-size:0.85em;">${t.category} • ${state.accounts.find(a=>a.id==t.accountId)?.name||'Unknown'} • ${t.date}</div></div>
+                                <div><div style="font-weight:600;">${t.name}</div><div class="text-muted" style="font-size:0.85em;">${t.category} • ${accMap[t.accountId]||'Unknown'} • ${t.date}</div></div>
                                 <div class="${t.amount<0?'negative':'positive'}">${t.amount<0?'-':'+'}${cur}${Math.abs(t.amount).toFixed(2)}</div>
                             </div>`).join('') || '<p class="text-muted">No transactions recorded yet.</p>'}
                     </div>
                 </div>`;
 
-            // Initialize Dashboard Chart
             setTimeout(() => {
                 const ctx = document.getElementById('dashWeeklyChart');
                 if (ctx) {
@@ -687,23 +752,22 @@
                         type: 'bar',
                         data: {
                             labels: last7DaysLabels,
-                            datasets: [{
-                                label: 'Expenses',
-                                data: last7DaysData,
-                                backgroundColor: state.settings.accent,
-                                borderRadius: 8
-                            }]
+                            datasets:[{ label: 'Expenses', data: last7DaysData, backgroundColor: state.settings.accent, borderRadius: 8 }]
                         },
                         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
                     }));
                 }
-            }, 50);
+            }, 10);
 
         } else if (currentView === 'table') {
-            const sorted = getFilteredTransactions().slice().sort((a,b) => new Date(b.date)-new Date(a.date));
+            const filteredTxs = getFilteredTransactions();
+            const sorted = filteredTxs.slice().sort((a,b) => b.date.localeCompare(a.date));
+            const accMap = {};
+            for(let i=0; i<state.accounts.length; i++) accMap[state.accounts[i].id] = state.accounts[i].name;
+
             container.innerHTML = `
-                <div class="cal-header"><h2>All Transactions</h2><button onclick="openTransModal()">+ New</button></div>
-                ${buildFilterBar(true)}
+                <div class="cal-header"><h2>All Transactions</h2><button onclick="openTransModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> New</button></div>
+                ${buildFilterBar(filteredTxs.length)}
                 <div class="table-responsive">
                     <table>
                         <thead><tr><th>Date</th><th>Item</th><th>Account</th><th>Category</th><th>Amount</th></tr></thead>
@@ -711,22 +775,24 @@
                             <tr onclick="openTransModal(${t.id})">
                                 <td>${t.date}</td>
                                 <td><strong>${t.name}</strong><br><small class="text-muted">${t.merchant}</small></td>
-                                <td>${state.accounts.find(a=>a.id==t.accountId)?.name||'N/A'}</td>
+                                <td>${accMap[t.accountId] || 'N/A'}</td>
                                 <td><span style="background:var(--accent);padding:3px 8px;border-radius:10px;font-size:12px;color:#fff;">${t.category}</span></td>
                                 <td class="${t.amount<0?'negative':'positive'}">${cur}${t.amount.toFixed(2)}</td>
                             </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;opacity:0.5;padding:30px;">No transactions match your filters.</td></tr>'}
                         </tbody>
                     </table>
                 </div>`;
+                
         } else if (currentView === 'calendar') {
             container.innerHTML = `
                 <div class="cal-header"><h2>Smart Calendar</h2><div>
-                    <button class="secondary" onclick="changeMonth(-1)" style="padding:8px 15px;">&lt;</button>
+                    <button class="secondary icon-btn" onclick="changeMonth(-1)" style="padding:8px 15px;"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
                     <span id="calMonthYear" style="margin:0 15px;font-weight:bold;font-size:1.2em;"></span>
-                    <button class="secondary" onclick="changeMonth(1)" style="padding:8px 15px;">&gt;</button>
+                    <button class="secondary icon-btn" onclick="changeMonth(1)" style="padding:8px 15px;"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                 </div></div>
                 <div class="calendar-grid" id="calGrid"></div>`;
             renderCalendar();
+            
         } else if (currentView === 'overview') {
             const monthSpend = getCurrentMonthSpendByCategory();
             const budgets = state.settings.budgets || {};
@@ -754,8 +820,9 @@
                     <div class="chart-box"><h3>Income vs Expenses</h3><canvas id="barChart"></canvas></div>
                 </div>`;
             renderCharts();
+            
         } else if (currentView === 'settings') {
-            const colors = ['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'];
+            const colors =['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'];
             const budgets = state.settings.budgets || {};
             container.innerHTML = `
                 <h2>App Settings</h2>
@@ -768,36 +835,48 @@
                         </select>
                         <label class="text-muted">Background Style</label>
                         <select onchange="updateSetting('bgGrad',this.value)">
-                            <option value="light" ${state.settings.bgGrad==='light'?'selected':''}>Warm Marble</option>
-                            <option value="blue" ${state.settings.bgGrad==='blue'?'selected':''}>Ocean Blue</option>
-                            <option value="purple" ${state.settings.bgGrad==='purple'?'selected':''}>Deep Galaxy</option>
+                            <option value="light" ${state.settings.bgGrad==='light'?'selected':''}>Solid Light</option>
+                            <option value="black" ${state.settings.bgGrad==='black'?'selected':''}>Solid Dark Grey</option>
+                            <option value="pureBlack" ${state.settings.bgGrad==='pureBlack'?'selected':''}>Pure Black (OLED)</option>
+                            <option value="deepBlue" ${state.settings.bgGrad==='deepBlue'?'selected':''}>Solid Deep Blue</option>
                         </select>
                         <label class="text-muted">Currency</label>
                         <select onchange="updateSetting('currency',this.value)">
                             <option value="$" ${state.settings.currency==='$'?'selected':''}>USD ($)</option>
                             <option value="€" ${state.settings.currency==='€'?'selected':''}>Euro (€)</option>
                             <option value="£" ${state.settings.currency==='£'?'selected':''}>GBP (£)</option>
-                            <option value="Rs. " ${state.settings.currency==='Rs. '?'selected':''}>NRS/INR (Rs.)</option>
+                            <option value="Rs. " ${state.settings.currency==='Rs. ' ? 'selected' : ''}>NRS/INR (Rs.)</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-muted">Accent Color</label>
                         <div class="color-picker">${colors.map(c=>`<div class="swatch ${state.settings.accent===c?'active':''}" style="background:${c}" onclick="updateSetting('accent','${c}')"></div>`).join('')}</div>
-                        <label class="text-muted">Interface Scale</label>
-                        <input type="range" min="14" max="22" value="${state.settings.fontSize}" onchange="updateSetting('fontSize',this.value)">
+                        <label class="text-muted">Interface Size</label>
+                        <select onchange="updateSetting('fontSize',this.value)">
+                            <option value="14" ${state.settings.fontSize===14?'selected':''}>Small</option>
+                            <option value="16" ${state.settings.fontSize===16?'selected':''}>Medium</option>
+                            <option value="18" ${state.settings.fontSize===18?'selected':''}>Large</option>
+                            <option value="22" ${state.settings.fontSize===22?'selected':''}>Extra Large</option>
+                        </select>
                     </div>
                 </div>
 
-                <h3 style="margin-top:30px;">Budget Limits <span class="text-muted" style="font-weight:normal;font-size:0.8em;">— monthly spend caps per category</span></h3>
-                <div id="budgetSettingsArea">
+                <h3 style="margin-top:30px;">Categories & Budget Limits</h3>
+                <div id="categorySettingsArea">
                     ${state.categories.map(c => `
                         <div class="budget-setting-row">
-                            <label>${c}</label>
-                            <input type="number" min="0" step="1" placeholder="No limit"
-                                value="${budgets[c] > 0 ? budgets[c] : ''}"
-                                onchange="updateBudget('${c}', this.value)"
-                                style="width:130px; margin:0; padding:8px 12px; flex:none;">
+                            <input type="text" value="${c}" onchange="renameCategory('${c}', this.value)" style="width:100%; margin:0; padding:8px 12px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; color: var(--text-main);">
+                            <input type="number" min="0" step="1" placeholder="Budget Limit" value="${budgets[c] > 0 ? budgets[c] : ''}" onchange="updateBudget('${c}', this.value)" style="width:130px; margin:0; padding:8px 12px; flex:none;">
+                            <button class="secondary danger icon-btn" onclick="deleteCategory('${c}')" type="button" title="Delete">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
                         </div>`).join('')}
+                    <div class="budget-setting-row" style="margin-top:12px;">
+                        <input type="text" id="newCategoryName" placeholder="New category name" style="width:100%; margin:0; padding:8px 12px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; color: var(--text-main);">
+                        <button class="secondary icon-btn" onclick="addCategory()" type="button" style="padding: 8px 18px;">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add
+                        </button>
+                    </div>
                 </div>`;
         }
     }
@@ -811,16 +890,22 @@
     }
 
     function changeMonth(dir) { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); }
+    
     function renderCalendar() {
         const year = calDate.getFullYear(), month = calDate.getMonth();
         const firstDay = new Date(year,month,1).getDay(), daysInMonth = new Date(year,month+1,0).getDate();
         const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('calMonthYear').innerText = new Date(year,month).toLocaleString('default',{month:'long',year:'numeric'});
-        let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div style="font-weight:bold;opacity:0.7;">${d}</div>`).join('');
+        
+        let html =['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div style="font-weight:bold;opacity:0.7;">${d}</div>`).join('');
         for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
+        
+        const txDates = new Set();
+        for(let i=0; i<state.transactions.length; i++) txDates.add(state.transactions[i].date);
+
         for(let i=1;i<=daysInMonth;i++) {
             const dStr=`${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-            const hasData=state.transactions.some(t=>t.date===dStr);
+            const hasData = txDates.has(dStr);
             html+=`<div class="cal-day${dStr===todayStr?' today':''}" onclick="openDayView('${dStr}')">${i}${hasData?'<div class="cal-dot"></div>':''}</div>`;
         }
         document.getElementById('calGrid').innerHTML = html;
@@ -841,15 +926,16 @@
 
     function renderCharts() {
         const catTotals = {}; let inc = 0, exp = 0;
-        state.transactions.forEach(t => {
+        for(let i=0; i<state.transactions.length; i++) {
+            const t = state.transactions[i];
             if(t.amount<0) { exp+=Math.abs(t.amount); catTotals[t.category]=(catTotals[t.category]||0)+Math.abs(t.amount); }
             else inc+=t.amount;
-        });
+        }
         Chart.defaults.color = state.settings.theme==='dark'?'#fff':'#000';
         setTimeout(() => {
             if(document.getElementById('pieChart')) chartInstances.push(new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:Object.keys(catTotals),datasets:[{data:Object.values(catTotals),backgroundColor:['#4a90e2','#e74c3c','#bb86fc','#2ecc71','#f39c12','#ff8fab'],borderWidth:0}]},options:{responsive:true,cutout:'70%'}}));
             if(document.getElementById('barChart')) chartInstances.push(new Chart(document.getElementById('barChart'),{type:'bar',data:{labels:['Income','Expenses'],datasets:[{data:[inc,exp],backgroundColor:['#2ecc71','#e74c3c'],borderRadius:10}]},options:{responsive:true,plugins:{legend:{display:false}}}}));
-        }, 50);
+        }, 10);
     }
 
     function handleCategorySelect(selectObj) {
@@ -863,12 +949,44 @@
         }
     }
 
+    function addCategory() {
+        const input = document.getElementById('newCategoryName');
+        if (!input) return;
+        const newCat = input.value.trim();
+        if (!newCat) return alert('Category name cannot be empty.');
+        if (state.categories.includes(newCat)) return alert('This category already exists.');
+        state.categories.push(newCat);
+        saveState();
+        renderView();
+    }
+
+    function renameCategory(oldName, newName) {
+        const trimmed = newName.trim();
+        if (!trimmed || trimmed === oldName) return;
+        if (state.categories.includes(trimmed)) return alert('A category with this name already exists.');
+        state.categories = state.categories.map(c => c === oldName ? trimmed : c);
+        state.transactions = state.transactions.map(t => ({ ...t, category: t.category === oldName ? trimmed : t.category }));
+        saveState();
+        renderView();
+    }
+
+    function deleteCategory(category) {
+        if (state.categories.length <= 1) return alert('At least one category must remain.');
+        if (!confirm(`Delete category "${category}"? Transactions in this category will be moved to the first category.`)) return;
+        state.categories = state.categories.filter(c => c !== category);
+        const fallback = state.categories[0] || 'Other';
+        if (!state.categories.length) state.categories = [fallback];
+        state.transactions = state.transactions.map(t => ({ ...t, category: t.category === category ? fallback : t.category }));
+        saveState();
+        renderView();
+    }
+
     function openTransModal(id=null) {
         editingId=id; editingType='trans';
         const t=id?state.transactions.find(x=>x.id===id):{name:'',merchant:'',amount:'',category:state.categories[0],accountId:state.accounts[0]?.id,date:new Date().toISOString().split('T')[0]};
         if(state.accounts.length===0) return alert("Please create an Account first!");
         document.getElementById('modalTitle').innerText=id?"Edit Transaction":"New Transaction";
-        document.getElementById('modalDeleteBtn').style.display=id?"block":"none";
+        document.getElementById('modalDeleteBtn').style.display=id?"flex":"none";
         document.getElementById('modalContent').innerHTML=`
             <select id="fAcc">${state.accounts.map(a=>`<option value="${a.id}" ${t.accountId==a.id?'selected':''}>${a.name}</option>`).join('')}</select>
             <input id="fName" value="${t.name}" placeholder="Title">
@@ -883,7 +1001,7 @@
         editingId=id; editingType='acc';
         const a=id?state.accounts.find(x=>x.id===id):{name:'',initialBalance:0};
         document.getElementById('modalTitle').innerText=id?"Edit Account":"New Account";
-        document.getElementById('modalDeleteBtn').style.display=id?"block":"none";
+        document.getElementById('modalDeleteBtn').style.display=id?"flex":"none";
         document.getElementById('modalContent').innerHTML=`<input id="fName" value="${a.name}" placeholder="Account Name"><input id="fAmt" type="number" step="0.01" value="${a.initialBalance}" placeholder="Starting Balance">`;
         document.getElementById('formModal').style.display='flex';
     }
@@ -912,36 +1030,35 @@
 
     function closeModal(id) { document.getElementById(id).style.display='none'; }
 
+    // Replaced Gradients with clean, solid background colors per request
     function applySettings() {
         document.body.setAttribute('data-theme', state.settings.theme);
         document.documentElement.style.setProperty('--font-size', state.settings.fontSize+'px');
         document.documentElement.style.setProperty('--accent', state.settings.accent);
         let bg;
-        if(state.settings.bgGrad==='blue') bg=state.settings.theme==='dark'?'linear-gradient(135deg, #0f172a, #172f45, #264263)':'linear-gradient(135deg, #d9e8f5, #9dbce0)';
-        else if(state.settings.bgGrad==='purple') bg=state.settings.theme==='dark'?'linear-gradient(135deg, #121229, #1d2b46, #2e3f5e)':'linear-gradient(135deg, #dde2f0, #b0bcd2)';
-        else bg=state.settings.theme==='dark'?'linear-gradient(135deg, #121b29, #192a3d)':'linear-gradient(135deg, #f4f7fb, #d7dee6)';
+        if (state.settings.bgGrad === 'light') bg = '#f4f7fb';
+        else if (state.settings.bgGrad === 'black') bg = '#090b10';
+        else if (state.settings.bgGrad === 'pureBlack') bg = '#000000';
+        else if (state.settings.bgGrad === 'deepBlue') bg = '#0f172a';
+        else bg = state.settings.theme === 'dark' ? '#121b29' : '#f4f7fb';
         document.documentElement.style.setProperty('--bg-grad', bg);
     }
+    
     function updateSetting(key,val) { state.settings[key]=key==='fontSize'?Number(val):val; saveState(); }
-
-    function toggleNetWorthVisibility() {
-        state.settings.hideBalances = !state.settings.hideBalances;
-        saveState();
-    }
-
+    
+    function toggleNetWorthVisibility() { state.settings.hideBalances = !state.settings.hideBalances; saveState(); }
+    
     const netWorthToggleBtn = document.getElementById('toggleNetWorthVisibility');
     if (netWorthToggleBtn) netWorthToggleBtn.addEventListener('click', toggleNetWorthVisibility);
 
     const toggleBtn = document.getElementById('accountsToggle');
     toggleBtn.addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('visible'); });
 
-    // ── Boot from localStorage first ──
     const cached = loadFromLocalStorage();
     if (cached) { state = cached; }
     updateUI();
 </script>
 
-<!-- FIREBASE AUTH & FIRESTORE LOGIC -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -963,49 +1080,39 @@
     const provider = new GoogleAuthProvider();
 
     const loginScreen = document.getElementById('loginScreen');
+    const topbar = document.getElementById('topbar');
     const navbar = document.getElementById('navbar');
     const mainApp = document.getElementById('appMain');
     const userName = document.getElementById('userName');
     const userPic = document.getElementById('userPic');
-    const syncStatus = document.getElementById('syncStatus');
 
     let currentUserUid = null;
-    let syncTimeout = null;
 
     window._firebaseSyncFn = async (appState) => {
         if (!currentUserUid) return;
         try {
-            if (syncTimeout) clearTimeout(syncTimeout);
-            syncStatus.innerText = "Syncing...";
-            syncStatus.style.color = "var(--text-main)";
+            setSyncState(SYNC_STATES.SYNCING);
             await setDoc(doc(db, "users", currentUserUid), { data: appState });
-            syncStatus.innerText = "Sync Completed";
-            syncStatus.style.color = "#2ecc71";
-            syncTimeout = setTimeout(() => { syncStatus.innerText = ""; }, 3000);
+            setSyncState(SYNC_STATES.COMPLETED);
         } catch (error) {
             console.error("Cloud Sync Error:", error);
-            syncStatus.innerText = "Sync Failed ❌";
-            syncStatus.style.color = "#e74c3c";
+            setSyncState(SYNC_STATES.ERROR);
         }
     };
 
     async function loadDataFromCloud(uid) {
         try {
-            syncStatus.innerText = "Fetching Cloud Data...";
+            setSyncState(SYNC_STATES.SYNCING);
             const docSnap = await getDoc(doc(db, "users", uid));
             if (docSnap.exists()) {
                 window.applyCloudState(docSnap.data().data);
-                syncStatus.innerText = "Sync Completed";
-                syncStatus.style.color = "#2ecc71";
-                setTimeout(() => syncStatus.innerText = "", 3000);
+                setSyncState(SYNC_STATES.COMPLETED);
             } else {
                 window._firebaseSyncFn(window._currentState ?? {});
             }
         } catch (error) {
             console.error("Error loading cloud data:", error);
-            syncStatus.innerText = "Offline mode";
-            syncStatus.style.color = "#f39c12";
-            setTimeout(() => syncStatus.innerText = "", 4000);
+            setSyncState(SYNC_STATES.ERROR);
         }
     }
 
@@ -1014,7 +1121,10 @@
         catch (error) { alert("Login Failed: " + error.message); }
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', () => { signOut(auth); });
+    document.getElementById('logoutBtn').addEventListener('click', () => { 
+        if(syncTimeoutTimer) clearTimeout(syncTimeoutTimer);
+        signOut(auth); 
+    });
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -1023,6 +1133,7 @@
             loginScreen.style.opacity = '0';
             setTimeout(() => {
                 loginScreen.style.display = 'none';
+                topbar.style.display = 'flex';
                 navbar.style.display = 'flex';
                 mainApp.style.display = 'flex';
                 userName.innerText = user.displayName.split(' ')[0];
@@ -1032,19 +1143,20 @@
             currentUserUid = null;
             loginScreen.style.display = 'flex';
             loginScreen.style.opacity = '1';
+            topbar.style.display = 'none';
             navbar.style.display = 'none';
             mainApp.style.display = 'none';
         }
     });
 </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Service Worker Registered!', reg.scope))
-                    .catch((err) => console.error('Service Worker Registration Failed!', err));
-            });
-        }
-    </script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then((reg) => console.log('Service Worker Registered!', reg.scope))
+                .catch((err) => console.error('Service Worker Registration Failed!', err));
+        });
+    }
+</script>
 </body>
 </html>
