@@ -191,11 +191,6 @@
         .filter-bar input, .filter-bar select { margin: 0; flex: 1; min-width: 120px; padding: 10px 14px; }
         .filter-bar .filter-count { font-size: 0.8em; opacity: 0.6; white-space: nowrap; padding: 0 5px; }
 
-        .budget-bar-wrap { margin-top: 6px; }
-        .budget-bar-track { background: rgba(255,255,255,0.1); border-radius: 10px; height: 7px; overflow: hidden; }
-        .budget-bar-fill { height: 100%; border-radius: 10px; transition: width 0.4s ease; }
-        .budget-label { display: flex; justify-content: space-between; font-size: 0.75em; opacity: 0.7; margin-top: 3px; }
-
         .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 15px; }
         .dash-layout-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px; }
         .dash-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -474,8 +469,8 @@
         },
         { 
             icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-            title: "Budgets & Calendar", 
-            desc: "Set monthly spending limits in Settings. Use the Smart Calendar and Overview tabs to visualize your daily spending habits at a glance." 
+            title: "Categories & Calendar", 
+            desc: "Manage categories in Settings. Use the Smart Calendar and Overview tabs to visualize your daily spending habits at a glance." 
         },
         { 
             icon: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
@@ -658,22 +653,6 @@
                 </select>
                 <span class="filter-count">${countLabel}</span>
                 ${(filterQuery||filterCategory||filterAccount) ? `<button class="secondary icon-btn" onclick="filterQuery='';filterCategory='';filterAccount='';renderView()" style="padding:6px 14px;font-size:12px;">Clear</button>` : ''}
-            </div>`;
-    }
-
-    function buildBudgetBar(category, spent, limit) {
-        if (!limit || limit <= 0) return '';
-        const pct = Math.min(100, (spent / limit) * 100);
-        const barColor = pct >= 100 ? '#e74c3c' : pct >= 80 ? '#f39c12' : '#2ecc71';
-        return `
-            <div class="budget-bar-wrap" style="margin-bottom:12px;">
-                <div class="budget-label" style="margin-bottom:4px; margin-top:0; font-size:0.85em;">
-                    <strong>${category}</strong>
-                    <span>${state.settings.currency}${spent.toFixed(0)} / ${state.settings.currency}${limit.toFixed(0)}</span>
-                </div>
-                <div class="budget-bar-track">
-                    <div class="budget-bar-fill" style="width:${pct}%; background:${barColor};"></div>
-                </div>
             </div>`;
     }
 
@@ -898,27 +877,8 @@
             renderCalendar();
             
         } else if (currentView === 'overview') {
-            const monthSpend = getCurrentMonthSpendByCategory();
-            const budgets = state.settings.budgets || {};
-            const budgetedCats = Object.keys(budgets).filter(c => budgets[c] > 0);
-
-            const budgetSection = budgetedCats.length ? `
-                <h3 style="margin-top:30px;">This Month's Budgets</h3>
-                ${budgetedCats.map(c => `
-                    <div style="margin-bottom:18px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <strong>${c}</strong>
-                            <span style="font-size:0.8em;" class="text-muted">${cur}${(monthSpend[c]||0).toFixed(2)} spent</span>
-                        </div>
-                        ${buildBudgetBar(c, monthSpend[c]||0, budgets[c])}
-                    </div>`).join('')}` : `
-                <p class="text-muted" style="margin-top:20px; font-size:0.9em;">
-                    No budgets set yet — go to <strong>Settings → Budget Limits</strong> to add them.
-                </p>`;
-
             container.innerHTML = `
                 <h2>Analytics Overview</h2>
-                ${budgetSection}
                 <div class="chart-grid">
                     <div class="chart-box"><h3>Spending by Category</h3><canvas id="pieChart"></canvas></div>
                     <div class="chart-box"><h3>Income vs Expenses</h3><canvas id="barChart"></canvas></div>
@@ -927,7 +887,6 @@
             
         } else if (currentView === 'settings') {
             const colors =['#4a90e2', '#e74c3c', '#bb86fc', '#2ecc71', '#f39c12', '#ff8fab'];
-            const budgets = state.settings.budgets || {};
             container.innerHTML = `
                 <h2>App Settings</h2>
                 <div class="settings-grid">
@@ -965,12 +924,11 @@
                     </div>
                 </div>
 
-                <h3 style="margin-top:30px;">Categories & Budget Limits</h3>
+                <h3 style="margin-top:30px;">Categories</h3>
                 <div id="categorySettingsArea">
                     ${state.categories.map(c => `
                         <div class="budget-setting-row">
                             <input type="text" value="${c}" onchange="renameCategory('${c}', this.value)" style="width:100%; margin:0; padding:8px 12px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; color: var(--text-main);">
-                            <input type="number" min="0" step="1" placeholder="Budget Limit" value="${budgets[c] > 0 ? budgets[c] : ''}" onchange="updateBudget('${c}', this.value)" style="width:130px; margin:0; padding:8px 12px; flex:none;">
                             <button class="secondary danger icon-btn" onclick="deleteCategory('${c}')" type="button" title="Delete">
                                 <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>
@@ -983,14 +941,6 @@
                     </div>
                 </div>`;
         }
-    }
-
-    function updateBudget(category, value) {
-        if (!state.settings.budgets) state.settings.budgets = {};
-        const num = parseFloat(value);
-        if (!isNaN(num) && num > 0) state.settings.budgets[category] = num;
-        else delete state.settings.budgets[category];
-        saveState();
     }
 
     function changeMonth(dir) { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); }
@@ -1211,7 +1161,7 @@
                 window.applyCloudState(docSnap.data().data);
                 setSyncState(SYNC_STATES.COMPLETED);
             } else {
-                window._firebaseSyncFn(window._currentState ?? {});
+                setSyncState(SYNC_STATES.COMPLETED);
             }
         } catch (error) {
             console.error("Error loading cloud data:", error);
@@ -1266,6 +1216,7 @@
         if (user) {
             isGuestSession = false;
             currentUserUid = user.uid;
+            state = loadFromLocalStorage() || createGuestState();
             await loadDataFromCloud(user.uid);
             loginScreen.style.opacity = '0';
             setTimeout(() => {
@@ -1273,6 +1224,7 @@
                 topbar.style.display = 'flex';
                 navbar.style.display = 'flex';
                 mainApp.style.display = 'flex';
+                syncStatus.style.display = '';
                 userName.innerText = user.displayName.split(' ')[0];
                 userPic.src = user.photoURL;
                 if (window.checkTutorial) window.checkTutorial();
